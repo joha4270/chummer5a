@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <chummer>
-	<version>-385</version>
+	<version>-395</version>
 	<categories>
 		<category>Heritage</category>
 		<category>Talent</category>
@@ -251,7 +251,7 @@
 				</metatype>
 				<metatype>
 					<name>Elf</name>
-					<value>6</value>
+					<value>7</value>
 					<metavariants>
 						<metavariant>
 							<name>Nocturna</name>
@@ -750,7 +750,7 @@
 				</talent>
 				<talent>
 					<name>Aspected Magician - 5 Magic</name>
-					<value>Aspected Magician</value>
+					<value>4spected Magician</value>
 					<qualities>
 						<quality>Aspected Magician</quality>
 					</qualities>
@@ -810,7 +810,7 @@
 				</talent>
 				<talent>
 					<name>Aspected Magician - 3 Magic</name>
-					<value>Aspected Magician</value>
+					<value>4spected Magician</value>
 					<qualities>
 						<quality>Aspected Magician</quality>
 					</qualities>
@@ -846,7 +846,7 @@
 				</talent>
 				<talent>
 					<name>Aspected Magician - 2 Magic</name>
-					<value>Aspected Magician</value>
+					<value>4spected Magician</value>
 					<qualities>
 						<quality>Aspected Magician</quality>
 					</qualities>

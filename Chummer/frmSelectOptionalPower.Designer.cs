@@ -82,6 +82,7 @@
 			this.CancelButton = this.cmdCancel;
 			this.ClientSize = new System.Drawing.Size(343, 101);
 			this.ControlBox = false;
+			this.Controls.Add(this.chkDoNotAffectMetatypeMaximum);
 			this.Controls.Add(this.cmdCancel);
 			this.Controls.Add(this.lblDescription);
 			this.Controls.Add(this.cmdOK);
@@ -98,6 +99,7 @@
 			this.Shown += new System.EventHandler(this.frmSelectOptionalPower_Shown);
 			this.ResumeLayout(false);
 			this.PerformLayout();
+
         }
 
         #endregion
@@ -106,5 +108,6 @@
         private System.Windows.Forms.ComboBox cboPower;
         private System.Windows.Forms.Label lblDescription;
         private System.Windows.Forms.Button cmdCancel;
+		private System.Windows.Forms.CheckBox chkDoNotAffectMetatypeMaximum;
     }
 }

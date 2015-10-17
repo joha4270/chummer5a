@@ -70,16 +70,18 @@
     <ManifestKeyFile>Chummer_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>false</GenerateManifests>
+    <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>false</SignManifests>
+    <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup />
   <PropertyGroup>
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
-  <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Legacy|x86'">
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <DebugSymbols>true</DebugSymbols>
@@ -128,9 +130,7 @@
     <Compile Include="Classes\clsOptions.cs" />
     <Compile Include="Classes\clsParameterAttribute.cs" />
     <Compile Include="Classes\clsStoryBuilder.cs" />
-    <Compile Include="Classes\clsTimekeeper.cs" />
     <Compile Include="Classes\clsUnique.cs" />
-    <Compile Include="Classes\clsUtils.cs" />
     <Compile Include="Classes\clsXmlExtensions.cs" />
     <Compile Include="Classes\clsXmlManager.cs" />
     <Compile Include="Controls\ConditionMonitorUserControl.cs">
@@ -222,7 +222,7 @@
     <Compile Include="frmSelectLifestyleQuality.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmSelectLifestyleQuality.Designer.cs">
+    <Compile Include="frmSelectLifestyleQuality.designer.cs">
       <DependentUpon>frmSelectLifestyleQuality.cs</DependentUpon>
     </Compile>
     <Compile Include="lang\language.Designer.cs">
@@ -231,7 +231,6 @@
       <DependentUpon>language.xsd</DependentUpon>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Compile>
-    <Compile Include="UI\Shared\CharacterShared.cs" />
     <Compile Include="Utilities\frmDiceHits.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -361,7 +360,7 @@
     <Compile Include="frmSelectLifestyle.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="frmSelectLifestyle.Designer.cs">
+    <Compile Include="frmSelectLifestyle.designer.cs">
       <DependentUpon>frmSelectLifestyle.cs</DependentUpon>
     </Compile>
     <Compile Include="frmSelectArmorMod.cs">
@@ -1024,6 +1023,12 @@
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Chummer_TemporaryKey.pfx" />
+    <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
+    <None Include="ClassDiagram3.cd" />
+    <None Include="ClassDiagram4.cd" />
+    <None Include="ClassDiagram5.cd" />
+    <None Include="ClassDiagram6.cd" />
     <None Include="data\armor.xsd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -1182,14 +1187,8 @@
     <None Include="data\vessels.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="data\weapons.xsc">
-      <DependentUpon>weapons.xsd</DependentUpon>
-    </None>
     <None Include="data\weapons.xsd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="data\weapons.xss">
-      <DependentUpon>weapons.xsd</DependentUpon>
     </None>
     <None Include="data\weapons.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -1494,7 +1493,6 @@
     </Content>
     <Content Include="data\gear.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
     </Content>
     <Content Include="data\improvements.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -1679,7 +1677,7 @@
     <Folder Include="settings\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

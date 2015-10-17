@@ -186,13 +186,13 @@ namespace Chummer
 			{
 				//This amount of object allocation is uglier than the US national dept, but improvementmanager is due for a rewrite anyway
 				ImprovementManager _objImprovement = new ImprovementManager(_objCharacter);
-				return _intValue + MetatypeMinimum + Math.Min(_objImprovement.ValueOf(Improvement.ImprovementType.Attributelevel, false, Abbrev),MetatypeMaximum - MetatypeMinimum);
+				return _intValue + MetatypeMinimum + _objImprovement.ValueOf(Improvement.ImprovementType.Attributelevel, false, Abbrev);
 			}
 			set
 			{
 				ImprovementManager _objImprovement = new ImprovementManager(_objCharacter);
 
-				_intValue = value - (MetatypeMinimum + Math.Min(_objImprovement.ValueOf(Improvement.ImprovementType.Attributelevel, false, Abbrev), MetatypeMaximum - MetatypeMinimum));
+				_intValue = value - (MetatypeMinimum + _objImprovement.ValueOf(Improvement.ImprovementType.Attributelevel, false, Abbrev));
 			}
 		}
 
@@ -937,7 +937,7 @@ namespace Chummer
 		Positive = 0,
 		Negative = 1,
         Entertainment = 2,
-        LifeModule = 3
+        LifeModule
 	}
 
 	/// <summary>
@@ -948,8 +948,7 @@ namespace Chummer
         Selected = 0,
         Metatype = 1,
         MetatypeRemovable = 2,
-		BuiltIn = 3,
-        LifeModule = 4
+        LifeModule,
     }
 
 	/// <summary>
@@ -958,12 +957,11 @@ namespace Chummer
 	[Flags]
 	public enum QualityFailureReason : uint
 	{
-		Allowed = 0x0,
-		LimitExceeded =  0x1,
-		RequiredSingle = 0x2,
-		RequiredMultiple = 0x4,
-		ForbiddenSingle = 0x8, 
-        MetatypeRequired = 0x10
+		Allowed = 0,
+		LimitExceeded =  1,
+		RequiredSingle = 2,
+		RequiredMultiple = 4,
+		ForbiddenSingle = 8
 	}
 
 	/// <summary>
@@ -979,7 +977,6 @@ namespace Chummer
 		private string _strPage = "";
 		private string _strMutant = "";
 		private string _strNotes = "";
-		private bool _blnImplemented = true;
 		private bool _blnContributeToLimit = true;
 		private bool _blnPrint = true;
 		private int _intBP = 0;
@@ -1011,6 +1008,12 @@ namespace Chummer
 			{
 				case "Negative":
 					return QualityType.Negative;
+                case "Entertainment - Asset":
+                    return QualityType.Entertainment;
+                case "Entertainment - Service":
+                    return QualityType.Entertainment;
+                case "Entertainment - Outing":
+                    return QualityType.Entertainment;
                 case "LifeModule":
 			        return QualityType.LifeModule;
 				default:
@@ -1032,8 +1035,6 @@ namespace Chummer
 					return QualitySource.MetatypeRemovable;
 				case "LifeModule":
 					return QualitySource.LifeModule;
-				case "Built-In":
-					return QualitySource.BuiltIn;
 				default:
 					return QualitySource.Selected;
 			}
@@ -1065,36 +1066,8 @@ namespace Chummer
             {
                 _strMetagenetic = objXmlQuality["metagenetic"].InnerText;
             }
-			// Check for a Variable Cost.
-			if (objXmlQuality["karma"].InnerText.StartsWith("Variable"))
-			{
-					int intMin = 0;
-					int intMax = 0;
-					string strCost = objXmlQuality["karma"].InnerText.Replace("Variable(", string.Empty).Replace(")", string.Empty);
-					if (strCost.Contains("-"))
-					{
-						string[] strValues = strCost.Split('-');
-						intMin = Convert.ToInt32(strValues[0]);
-						intMax = Convert.ToInt32(strValues[1]);
-					}
-					else
-						intMin = Convert.ToInt32(strCost.Replace("+", string.Empty));
-
-					if (intMin != 0 || intMax != 0)
-					{
-						frmSelectNumber frmPickNumber = new frmSelectNumber();
-						if (intMax == 0)
-							intMax = 1000000;
-						frmPickNumber.Minimum = intMin;
-						frmPickNumber.Maximum = intMax;
-						frmPickNumber.Description = LanguageManager.Instance.GetString("String_SelectVariableCost").Replace("{0}", DisplayNameShort);
-						frmPickNumber.AllowCancel = false;
-						frmPickNumber.ShowDialog();
-						_intBP = frmPickNumber.SelectedValue;
-					}
-			}
-			else
-			{ 
+            if (objXmlQuality["karma"] != null)
+            {
                 _intBP = Convert.ToInt32(objXmlQuality["karma"].InnerText);
             }
             if (objXmlQuality["lp"] != null)
@@ -1107,11 +1080,6 @@ namespace Chummer
 			{
 				if (objXmlQuality["print"].InnerText == "no")
 					_blnPrint = false;
-			}
-			if (objXmlQuality["implemented"] != null)
-			{
-				if (objXmlQuality["implemented"].InnerText == "False")
-					_blnImplemented = false;
 			}
 			if (objXmlQuality["contributetolimit"] != null)
 			{
@@ -1201,8 +1169,7 @@ namespace Chummer
 			objWriter.WriteElementString("name", _strName);
 			objWriter.WriteElementString("extra", _strExtra);
 			objWriter.WriteElementString("bp", _intBP.ToString());
-			objWriter.WriteElementString("implemented", _blnImplemented.ToString());
-			objWriter.WriteElementString("contributetolimit", _blnContributeToLimit.ToString());
+            objWriter.WriteElementString("contributetolimit", _blnContributeToLimit.ToString());
             objWriter.WriteElementString("metagenetic", _strMetagenetic.ToString());
 			objWriter.WriteElementString("print", _blnPrint.ToString());
 			objWriter.WriteElementString("qualitytype", _objQualityType.ToString());
@@ -1241,18 +1208,10 @@ namespace Chummer
 			_strName = objNode["name"].InnerText;
 			_strExtra = objNode["extra"].InnerText;
 			_intBP = Convert.ToInt32(objNode["bp"].InnerText);
-			_blnImplemented = Convert.ToBoolean(objNode["implemented"].InnerText);
 			_blnContributeToLimit = Convert.ToBoolean(objNode["contributetolimit"].InnerText);
 			_blnPrint = Convert.ToBoolean(objNode["print"].InnerText);
 			_objQualityType = ConvertToQualityType(objNode["qualitytype"].InnerText);
 			_objQualitySource = ConvertToQualitySource(objNode["qualitysource"].InnerText);
-            try
-            {
-                _strMetagenetic = objNode["metagenetic"].InnerText;
-            }
-            catch 
-            {
-            }
 			try
 			{
 				_strMutant = objNode["mutant"].InnerText;
@@ -1570,20 +1529,6 @@ namespace Chummer
 		}
 
 		/// <summary>
-		/// Whether or not the Quality has been implemented completely, or needs additional code support.
-		/// </summary>
-		public bool Implemented
-		{
-			get
-			{
-				return _blnImplemented;
-			}
-			set
-			{
-				_blnImplemented = value;
-			}
-		}
-		/// <summary>
 		/// Whether or not the Quality contributes towards the character's Quality BP limits.
 		/// </summary>
 		public bool ContributeToLimit
@@ -1779,7 +1724,7 @@ namespace Chummer
 			{
 				foreach (Quality objQuality in objCharacter.Qualities)
 				{
-					if (objQuality.QualityId == objXmlQuality["id"].InnerText)
+					if (objQuality.Name == objXmlQuality["name"].InnerText)
 					{
 						reason |= QualityFailureReason.LimitExceeded; //QualityFailureReason is a flag enum, meaning each bit represents a different thing
 						//So instead of changing it, |= adds rhs to list of reasons on lhs, if it is not present
@@ -1792,54 +1737,31 @@ namespace Chummer
 			{
 				if (objXmlQuality["required"]["oneof"] != null)
 				{
-					if (objXmlQuality["required"]["oneof"]["quality"] != null)
+					XmlNodeList objXmlRequiredList = objXmlQuality.SelectNodes("required/oneof/quality");
+					//Add to set for O(N log M) runtime instead of O(N * M)
+					//like it matters...
+
+					HashSet<String> qualityRequired = new HashSet<String>();
+					foreach (XmlNode node in objXmlRequiredList)
 					{
-						XmlNodeList objXmlRequiredList = objXmlQuality.SelectNodes("required/oneof/quality");
-						//Add to set for O(N log M) runtime instead of O(N * M)
-						//like it matters...
+						qualityRequired.Add(node.InnerText);
+					}
 
-						HashSet<String> qualityRequired = new HashSet<String>();
-						foreach (XmlNode node in objXmlRequiredList)
+					bool blnFound = false;
+					foreach (Quality quality in objCharacter.Qualities)
+					{
+						if (qualityRequired.Contains(quality.Name))
 						{
-							qualityRequired.Add(node.InnerText);
-						}
-
-						bool blnFound = false;
-						foreach (Quality quality in objCharacter.Qualities)
-						{
-							if (qualityRequired.Contains(quality.Name))
-							{
-								blnFound = true;
-								break;
-							}
-						}
-
-						if (!blnFound)
-						{
-							reason |= QualityFailureReason.RequiredSingle;
+							blnFound = true;
+							break;
 						}
 					}
 
-					if (objXmlQuality["required"]["oneof"]["metatype"] != null)
+					if (!blnFound)
 					{
-						XmlNodeList objXmlRequiredList = objXmlQuality.SelectNodes("required/oneof/metatype");
-
-						bool blnFound = false;
-						foreach (XmlNode node in objXmlRequiredList)
-						{
-							if (node.InnerText == objCharacter.Metatype)
-							{
-								blnFound = true;
-								break;
-							}
-						}
-
-						if (!blnFound)
-						{
-							reason |= QualityFailureReason.MetatypeRequired;
-						}
+						reason |= QualityFailureReason.RequiredSingle;
 					}
-                }
+				}
 				if (objXmlQuality["required"]["allof"] != null)
 				{
 					XmlNodeList objXmlRequiredList = objXmlQuality.SelectNodes("required/allof/quality");
@@ -1929,8 +1851,6 @@ namespace Chummer
 								workNode["bonus"].AppendChild(childNode.Clone());
 							}
 						}
-						else
-						{ }
 					}
 				}
 			}
@@ -3948,7 +3868,7 @@ namespace Chummer
                 {
                     for (int i = _intFreeLevels + 1; i <= _intRating; i++)
                     {
-                        if ((_objCharacter.Uneducated && _strSkillCategory == "Technical Active") || (_objCharacter.Uncouth && _strSkillCategory == "Social Active"))
+                        if ((_objCharacter.Uneducated && _strSkillCategory == "Technical Active") || (_objCharacter.Uncouth && _strSkillCategory == "Social Active") || (_objCharacter.Infirm && _strSkillCategory == "Physical Active"))
                         {
                             intBP += (i * _objCharacter.Options.KarmaImproveActiveSkill * 2);
                             // Karma cost is doubled when increasing a Skill's Rating above 6.
@@ -3968,13 +3888,13 @@ namespace Chummer
                 {
 				    // The first point in a Skill costs KarmaNewActiveSkill.
 				    // Each additional beyond 1 costs i x KarmaImproveActiveSkill.
-				    if ((_objCharacter.Uneducated && _strSkillCategory == "Technical Active") || (_objCharacter.Uncouth && _strSkillCategory == "Social Active"))
+				    if ((_objCharacter.Uneducated && _strSkillCategory == "Technical Active") || (_objCharacter.Uncouth && _strSkillCategory == "Social Active") || (_objCharacter.Infirm && _strSkillCategory == "Physical Active"))
 					    intBP += _objCharacter.Options.KarmaNewActiveSkill * 2;
 				    else
 					    intBP += _objCharacter.Options.KarmaNewActiveSkill;
 				    for (int i = 2; i <= _intRating; i++)
 				    {
-					    if ((_objCharacter.Uneducated && _strSkillCategory == "Technical Active") || (_objCharacter.Uncouth && _strSkillCategory == "Social Active"))
+					    if ((_objCharacter.Uneducated && _strSkillCategory == "Technical Active") || (_objCharacter.Uncouth && _strSkillCategory == "Social Active") || (_objCharacter.Infirm && _strSkillCategory == "Physical Active"))
 					    {
 						    intBP += (i * _objCharacter.Options.KarmaImproveActiveSkill * 2);
 						    // Karma cost is doubled when increasing a Skill's Rating above 6.
@@ -7488,7 +7408,7 @@ namespace Chummer
 	}
 
 	/// <summary>
-	/// A Technomancer Program or Complex Form.
+	/// A Technoamncer Program or Complex Form.
 	/// </summary>
 	public class ComplexForm
 	{
@@ -7501,8 +7421,6 @@ namespace Chummer
 		private string _strPage = "";
         private string _strNotes = "";
         private string _strExtra = "";
-		private string _strAltName = "";
-		private string _strAltPage = "";
 		private readonly Character _objCharacter;
 
 		#region Constructor, Create, Save, Load, and Print Methods
@@ -7520,18 +7438,6 @@ namespace Chummer
 		/// <param name="strForcedValue">Value to forcefully select for any ImprovementManager prompts.</param>
 		public void Create(XmlNode objXmlProgramNode, Character objCharacter, TreeNode objNode, string strExtra = "")
 		{
-			if (GlobalOptions.Instance.Language != "en-us")
-			{
-				XmlDocument objXmlDocument = XmlManager.Instance.Load("complexforms.xml");
-				XmlNode objSpellNode = objXmlDocument.SelectSingleNode("/chummer/complexforms/complexform[name = \"" + _strName + "\"]");
-				if (objSpellNode != null)
-				{
-					if (objSpellNode["translate"] != null)
-						_strAltName = objSpellNode["translate"].InnerText;
-					if (objSpellNode["altpage"] != null)
-						_strAltPage = objSpellNode["altpage"].InnerText;
-				}
-			}
 			_strName = objXmlProgramNode["name"].InnerText;
             _strTarget = objXmlProgramNode["target"].InnerText;
 			_strSource = objXmlProgramNode["source"].InnerText;
@@ -7539,7 +7445,6 @@ namespace Chummer
             _strDuration = objXmlProgramNode["duration"].InnerText;
             _strExtra = strExtra;
             _strFV = objXmlProgramNode["fv"].InnerText;
-
             try
             {
                 _strNotes = objXmlProgramNode["notes"].InnerText;
@@ -7706,16 +7611,16 @@ namespace Chummer
                 if (_strExtra != "")
                     strReturn += " (" + _strExtra + ")";
 				// Get the translated name if applicable.
-                if (GlobalOptions.Instance.Language != "en-us")
-                {
-                    XmlDocument objXmlDocument = XmlManager.Instance.Load("complexforms.xml");
-                    XmlNode objNode = objXmlDocument.SelectSingleNode("/chummer/complexforms/complexform[name = \"" + _strName + "\"]");
-                    if (objNode != null)
-                    {
-                        if (objNode["translate"] != null)
-                            strReturn = objNode["translate"].InnerText;
-                    }
-                }
+                //if (GlobalOptions.Instance.Language != "en-us")
+                //{
+                //    XmlDocument objXmlDocument = XmlManager.Instance.Load("complexforms.xml");
+                //    XmlNode objNode = objXmlDocument.SelectSingleNode("/chummer/complexforms/complexform[name = \"" + _strName + "\"]");
+                //    if (objNode != null)
+                //    {
+                //        if (objNode["translate"] != null)
+                //            strReturn = objNode["translate"].InnerText;
+                //    }
+                //}
 
 				return strReturn;
 			}
@@ -8751,9 +8656,8 @@ namespace Chummer
         private bool _blnIsGroup = false;
 		private Character _objCharacter;
 	    private bool _blnMadeMan;
-		private bool _readonly = false;
 
-		#region Helper Methods
+	    #region Helper Methods
 		/// <summary>
 		/// Convert a string to a ContactType.
 		/// </summary>
@@ -8799,10 +8703,7 @@ namespace Chummer
 			objWriter.WriteElementString("free", _blnFree.ToString());
             objWriter.WriteElementString("group", _blnIsGroup.ToString());
             objWriter.WriteElementString("mademan", _blnMadeMan.ToString());
-
-			if (ReadOnly) objWriter.WriteElementString("readonly", "");
-
-			if (_strUnique != null)
+		    if (_strUnique != null)
 		    {
 		        objWriter.WriteElementString("guid", _strUnique);
 		    }
@@ -8890,8 +8791,6 @@ namespace Chummer
 		    {
 		    }
 
-
-			if (objNode["readonly"] != null) _readonly = true;
 		    objNode.TryGetField("mademan", out _blnMadeMan);
 		}
 
@@ -8918,19 +8817,6 @@ namespace Chummer
 		#endregion
 
 		#region Properties
-
-		public bool ReadOnly
-		{
-			get
-			{
-				return _readonly;
-			}
-			set
-			{
-				_readonly = value; 
-			}
-		}
-
 
         /// <summary>
         /// Total points used for this contact.
@@ -9010,7 +8896,7 @@ namespace Chummer
 		{
 			get
 			{
-				return _intLoyalty;
+				return IsGroup ? (MadeMan ? 3 : 1) :_intLoyalty;
 			}
 			set
 			{
@@ -9032,11 +8918,6 @@ namespace Chummer
             set
             {
                 _blnIsGroup = value;
-
-	            if (value)
-	            {
-		            _intLoyalty = 1;
-	            }
             }
 	    }
 
@@ -9174,11 +9055,7 @@ namespace Chummer
 	        set
 	        {
                 _blnMadeMan = value;
-		        if (value)
-		        {
-			        _intLoyalty = 3;
-		        }
-	        }
+            }
 	    }
 
 	    #endregion

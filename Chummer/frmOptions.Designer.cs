@@ -52,9 +52,6 @@
 			this.lblKarmaContactExtra = new System.Windows.Forms.Label();
 			this.nudKarmaContact = new System.Windows.Forms.NumericUpDown();
 			this.lblKarmaContact = new System.Windows.Forms.Label();
-            this.lblKarmaEnemyExtra = new System.Windows.Forms.Label();
-            this.nudKarmaEnemy = new System.Windows.Forms.NumericUpDown();
-            this.lblKarmaEnemy = new System.Windows.Forms.Label();
 			this.lblKarmaNuyenPerExtra = new System.Windows.Forms.Label();
 			this.nudKarmaNuyenPer = new System.Windows.Forms.NumericUpDown();
 			this.lblKarmaNuyenPer = new System.Windows.Forms.Label();
@@ -227,7 +224,6 @@
 			this.chkCapSkillRating = new System.Windows.Forms.CheckBox();
 			this.chkNoSingleArmorEncumbrance = new System.Windows.Forms.CheckBox();
 			this.tabHouseRules = new System.Windows.Forms.TabPage();
-			this.chkAllowCyberwareESSDiscounts = new System.Windows.Forms.CheckBox();
 			this.chkExceedNegativeQualitiesLimit = new System.Windows.Forms.CheckBox();
 			this.chkExceedNegativeQualities = new System.Windows.Forms.CheckBox();
 			this.chkExceedPositiveQualities = new System.Windows.Forms.CheckBox();
@@ -249,7 +245,6 @@
 			this.lblSettingName = new System.Windows.Forms.Label();
 			this.txtSettingName = new System.Windows.Forms.TextBox();
 			this.tipTooltip = new System.Windows.Forms.ToolTip(this.components);
-			this.chkMissions = new System.Windows.Forms.CheckBox();
 			((System.ComponentModel.ISupportInitialize)(this.nudKarmaComplexFormOption)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudKarmaMetamagic)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.nudKarmaInitiation)).BeginInit();
@@ -372,7 +367,7 @@
 			this.nudKarmaMetamagic.Location = new System.Drawing.Point(560, 4);
 			this.nudKarmaMetamagic.Name = "nudKarmaMetamagic";
 			this.nudKarmaMetamagic.Size = new System.Drawing.Size(47, 20);
-			this.nudKarmaMetamagic.TabIndex = 58;
+			this.nudKarmaMetamagic.TabIndex = 55;
 			// 
 			// lblKarmaMetamagic
 			// 
@@ -380,43 +375,43 @@
 			this.lblKarmaMetamagic.Location = new System.Drawing.Point(402, 6);
 			this.lblKarmaMetamagic.Name = "lblKarmaMetamagic";
 			this.lblKarmaMetamagic.Size = new System.Drawing.Size(154, 13);
-			this.lblKarmaMetamagic.TabIndex = 57;
+			this.lblKarmaMetamagic.TabIndex = 54;
 			this.lblKarmaMetamagic.Tag = "Label_Options_Metamagics";
 			this.lblKarmaMetamagic.Text = "Additional Metamagics/Echoes";
 			// 
 			// lblKarmaInitiationBracket
 			// 
 			this.lblKarmaInitiationBracket.AutoSize = true;
-			this.lblKarmaInitiationBracket.Location = new System.Drawing.Point(158, 526);
+			this.lblKarmaInitiationBracket.Location = new System.Drawing.Point(158, 500);
 			this.lblKarmaInitiationBracket.Name = "lblKarmaInitiationBracket";
 			this.lblKarmaInitiationBracket.Size = new System.Drawing.Size(10, 13);
-			this.lblKarmaInitiationBracket.TabIndex = 54;
+			this.lblKarmaInitiationBracket.TabIndex = 51;
 			this.lblKarmaInitiationBracket.Text = "(";
 			// 
 			// lblKarmaInitiationExtra
 			// 
 			this.lblKarmaInitiationExtra.AutoSize = true;
-			this.lblKarmaInitiationExtra.Location = new System.Drawing.Point(219, 526);
+			this.lblKarmaInitiationExtra.Location = new System.Drawing.Point(219, 500);
 			this.lblKarmaInitiationExtra.Name = "lblKarmaInitiationExtra";
 			this.lblKarmaInitiationExtra.Size = new System.Drawing.Size(98, 13);
-			this.lblKarmaInitiationExtra.TabIndex = 56;
+			this.lblKarmaInitiationExtra.TabIndex = 53;
 			this.lblKarmaInitiationExtra.Tag = "Label_Options_NewRatingTen";
 			this.lblKarmaInitiationExtra.Text = "x New Rating) + 10";
 			// 
 			// nudKarmaInitiation
 			// 
-			this.nudKarmaInitiation.Location = new System.Drawing.Point(166, 524);
+			this.nudKarmaInitiation.Location = new System.Drawing.Point(166, 498);
 			this.nudKarmaInitiation.Name = "nudKarmaInitiation";
 			this.nudKarmaInitiation.Size = new System.Drawing.Size(47, 20);
-			this.nudKarmaInitiation.TabIndex = 55;
+			this.nudKarmaInitiation.TabIndex = 52;
 			// 
 			// lblKarmaInitiation
 			// 
 			this.lblKarmaInitiation.AutoSize = true;
-			this.lblKarmaInitiation.Location = new System.Drawing.Point(8, 526);
+			this.lblKarmaInitiation.Location = new System.Drawing.Point(8, 500);
 			this.lblKarmaInitiation.Name = "lblKarmaInitiation";
 			this.lblKarmaInitiation.Size = new System.Drawing.Size(112, 13);
-			this.lblKarmaInitiation.TabIndex = 53;
+			this.lblKarmaInitiation.TabIndex = 50;
 			this.lblKarmaInitiation.Tag = "Label_Options_Initiation";
 			this.lblKarmaInitiation.Text = "Initiation / Submersion";
 			// 
@@ -467,56 +462,29 @@
 			// lblKarmaCarryoverExtra
 			// 
 			this.lblKarmaCarryoverExtra.AutoSize = true;
-			this.lblKarmaCarryoverExtra.Location = new System.Drawing.Point(219, 500);
+			this.lblKarmaCarryoverExtra.Location = new System.Drawing.Point(219, 474);
 			this.lblKarmaCarryoverExtra.Name = "lblKarmaCarryoverExtra";
 			this.lblKarmaCarryoverExtra.Size = new System.Drawing.Size(51, 13);
-			this.lblKarmaCarryoverExtra.TabIndex = 52;
+			this.lblKarmaCarryoverExtra.TabIndex = 49;
 			this.lblKarmaCarryoverExtra.Tag = "Label_Options_Maximum";
 			this.lblKarmaCarryoverExtra.Text = "Maximum";
 			// 
 			// nudKarmaCarryover
 			// 
-			this.nudKarmaCarryover.Location = new System.Drawing.Point(166, 498);
+			this.nudKarmaCarryover.Location = new System.Drawing.Point(166, 472);
 			this.nudKarmaCarryover.Name = "nudKarmaCarryover";
 			this.nudKarmaCarryover.Size = new System.Drawing.Size(47, 20);
-			this.nudKarmaCarryover.TabIndex = 51;
+			this.nudKarmaCarryover.TabIndex = 48;
 			// 
 			// lblKarmaCarryover
 			// 
 			this.lblKarmaCarryover.AutoSize = true;
-			this.lblKarmaCarryover.Location = new System.Drawing.Point(8, 500);
+			this.lblKarmaCarryover.Location = new System.Drawing.Point(8, 474);
 			this.lblKarmaCarryover.Name = "lblKarmaCarryover";
 			this.lblKarmaCarryover.Size = new System.Drawing.Size(141, 13);
-			this.lblKarmaCarryover.TabIndex = 50;
+			this.lblKarmaCarryover.TabIndex = 47;
 			this.lblKarmaCarryover.Tag = "Label_Options_Carryover";
 			this.lblKarmaCarryover.Text = "Carryover for New Character";
-            // 
-            // lblKarmaEnemyExtra
-            // 
-            this.lblKarmaEnemyExtra.AutoSize = true;
-            this.lblKarmaEnemyExtra.Location = new System.Drawing.Point(219, 474);
-            this.lblKarmaEnemyExtra.Name = "lblKarmaEnemyExtra";
-            this.lblKarmaEnemyExtra.Size = new System.Drawing.Size(120, 13);
-            this.lblKarmaEnemyExtra.TabIndex = 49;
-            this.lblKarmaEnemyExtra.Tag = "Label_Options_ConnectionLoyalty";
-            this.lblKarmaEnemyExtra.Text = "x (Connection + Loyalty)";
-            // 
-            // nudKarmaEnemy
-            // 
-            this.nudKarmaEnemy.Location = new System.Drawing.Point(166, 472);
-            this.nudKarmaEnemy.Name = "nudKarmaEnemy";
-            this.nudKarmaEnemy.Size = new System.Drawing.Size(47, 20);
-            this.nudKarmaEnemy.TabIndex = 48;
-            // 
-            // lblKarmaEnemy
-            // 
-            this.lblKarmaEnemy.AutoSize = true;
-            this.lblKarmaEnemy.Location = new System.Drawing.Point(8, 474);
-            this.lblKarmaEnemy.Name = "lblKarmaEnemy";
-            this.lblKarmaEnemy.Size = new System.Drawing.Size(49, 13);
-            this.lblKarmaEnemy.TabIndex = 47;
-            this.lblKarmaEnemy.Tag = "Label_Options_Enemies";
-            this.lblKarmaEnemy.Text = "Enemies";
 			// 
 			// lblKarmaContactExtra
 			// 
@@ -855,7 +823,7 @@
 			// chkMoreLethalGameplay
 			// 
 			this.chkMoreLethalGameplay.AutoSize = true;
-			this.chkMoreLethalGameplay.Location = new System.Drawing.Point(366, 29);
+			this.chkMoreLethalGameplay.Location = new System.Drawing.Point(8, 98);
 			this.chkMoreLethalGameplay.Name = "chkMoreLethalGameplay";
 			this.chkMoreLethalGameplay.Size = new System.Drawing.Size(132, 17);
 			this.chkMoreLethalGameplay.TabIndex = 0;
@@ -1039,7 +1007,7 @@
 			// 
 			// cmdURLAppPath
 			// 
-			this.cmdURLAppPath.Location = new System.Drawing.Point(407, 254);
+			this.cmdURLAppPath.Location = new System.Drawing.Point(407, 214);
 			this.cmdURLAppPath.Name = "cmdURLAppPath";
 			this.cmdURLAppPath.Size = new System.Drawing.Size(27, 23);
 			this.cmdURLAppPath.TabIndex = 21;
@@ -1049,7 +1017,7 @@
 			// 
 			// txtURLAppPath
 			// 
-			this.txtURLAppPath.Location = new System.Drawing.Point(153, 256);
+			this.txtURLAppPath.Location = new System.Drawing.Point(153, 216);
 			this.txtURLAppPath.Name = "txtURLAppPath";
 			this.txtURLAppPath.ReadOnly = true;
 			this.txtURLAppPath.Size = new System.Drawing.Size(248, 20);
@@ -1058,7 +1026,7 @@
 			// lblURLAppPath
 			// 
 			this.lblURLAppPath.AutoSize = true;
-			this.lblURLAppPath.Location = new System.Drawing.Point(6, 259);
+			this.lblURLAppPath.Location = new System.Drawing.Point(6, 219);
 			this.lblURLAppPath.Name = "lblURLAppPath";
 			this.lblURLAppPath.Size = new System.Drawing.Size(126, 13);
 			this.lblURLAppPath.TabIndex = 19;
@@ -1177,7 +1145,7 @@
 			// 
 			// cmdPDFAppPath
 			// 
-			this.cmdPDFAppPath.Location = new System.Drawing.Point(407, 290);
+			this.cmdPDFAppPath.Location = new System.Drawing.Point(407, 250);
 			this.cmdPDFAppPath.Name = "cmdPDFAppPath";
 			this.cmdPDFAppPath.Size = new System.Drawing.Size(27, 23);
 			this.cmdPDFAppPath.TabIndex = 11;
@@ -1187,7 +1155,7 @@
 			// 
 			// txtPDFAppPath
 			// 
-			this.txtPDFAppPath.Location = new System.Drawing.Point(153, 292);
+			this.txtPDFAppPath.Location = new System.Drawing.Point(153, 252);
 			this.txtPDFAppPath.Name = "txtPDFAppPath";
 			this.txtPDFAppPath.ReadOnly = true;
 			this.txtPDFAppPath.Size = new System.Drawing.Size(248, 20);
@@ -1196,7 +1164,7 @@
 			// lblPDFAppPath
 			// 
 			this.lblPDFAppPath.AutoSize = true;
-			this.lblPDFAppPath.Location = new System.Drawing.Point(6, 295);
+			this.lblPDFAppPath.Location = new System.Drawing.Point(6, 255);
 			this.lblPDFAppPath.Name = "lblPDFAppPath";
 			this.lblPDFAppPath.Size = new System.Drawing.Size(141, 13);
 			this.lblPDFAppPath.TabIndex = 9;
@@ -1674,14 +1642,11 @@
 			this.tabKarmaCosts.Controls.Add(this.lblKarmaImproveSkillGroup);
 			this.tabKarmaCosts.Controls.Add(this.lblKarmaCarryover);
 			this.tabKarmaCosts.Controls.Add(this.nudKarmaImproveSkillGroup);
-            this.tabKarmaCosts.Controls.Add(this.lblKarmaContact);
-            this.tabKarmaCosts.Controls.Add(this.nudKarmaContact); 
-            this.tabKarmaCosts.Controls.Add(this.lblKarmaContactExtra);
-            this.tabKarmaCosts.Controls.Add(this.lblKarmaEnemy); 
-            this.tabKarmaCosts.Controls.Add(this.nudKarmaEnemy);
-            this.tabKarmaCosts.Controls.Add(this.lblKarmaEnemyExtra);
-            this.tabKarmaCosts.Controls.Add(this.lblKarmaImproveSkillGroupExtra);
+			this.tabKarmaCosts.Controls.Add(this.lblKarmaContactExtra);
+			this.tabKarmaCosts.Controls.Add(this.lblKarmaImproveSkillGroupExtra);
+			this.tabKarmaCosts.Controls.Add(this.nudKarmaContact);
 			this.tabKarmaCosts.Controls.Add(this.lblKarmaAttribute);
+			this.tabKarmaCosts.Controls.Add(this.lblKarmaContact);
 			this.tabKarmaCosts.Controls.Add(this.nudKarmaAttribute);
 			this.tabKarmaCosts.Controls.Add(this.lblKarmaNuyenPerExtra);
 			this.tabKarmaCosts.Controls.Add(this.lblKarmaAttributeExtra);
@@ -2262,7 +2227,6 @@
 			// tabOptionalRules
 			// 
 			this.tabOptionalRules.BackColor = System.Drawing.SystemColors.Control;
-			this.tabOptionalRules.Controls.Add(this.chkMissions);
 			this.tabOptionalRules.Controls.Add(this.chkContactPoints);
 			this.tabOptionalRules.Controls.Add(this.chkMayBuyQualities);
 			this.tabOptionalRules.Controls.Add(this.chkExtendAnyDetectionSpell);
@@ -2292,7 +2256,7 @@
 			// chkContactPoints
 			// 
 			this.chkContactPoints.AutoSize = true;
-			this.chkContactPoints.Location = new System.Drawing.Point(366, 259);
+			this.chkContactPoints.Location = new System.Drawing.Point(8, 328);
 			this.chkContactPoints.Name = "chkContactPoints";
 			this.chkContactPoints.Size = new System.Drawing.Size(252, 17);
 			this.chkContactPoints.TabIndex = 32;
@@ -2304,7 +2268,7 @@
 			// chkMayBuyQualities
 			// 
 			this.chkMayBuyQualities.AutoSize = true;
-			this.chkMayBuyQualities.Location = new System.Drawing.Point(366, 282);
+			this.chkMayBuyQualities.Location = new System.Drawing.Point(8, 351);
 			this.chkMayBuyQualities.Name = "chkMayBuyQualities";
 			this.chkMayBuyQualities.Size = new System.Drawing.Size(148, 17);
 			this.chkMayBuyQualities.TabIndex = 31;
@@ -2316,7 +2280,7 @@
 			// chkExtendAnyDetectionSpell
 			// 
 			this.chkExtendAnyDetectionSpell.AutoSize = true;
-			this.chkExtendAnyDetectionSpell.Location = new System.Drawing.Point(366, 75);
+			this.chkExtendAnyDetectionSpell.Location = new System.Drawing.Point(8, 144);
 			this.chkExtendAnyDetectionSpell.Name = "chkExtendAnyDetectionSpell";
 			this.chkExtendAnyDetectionSpell.Size = new System.Drawing.Size(378, 17);
 			this.chkExtendAnyDetectionSpell.TabIndex = 30;
@@ -2339,7 +2303,7 @@
 			// chkAlternateMatrixAttribute
 			// 
 			this.chkAlternateMatrixAttribute.AutoSize = true;
-			this.chkAlternateMatrixAttribute.Location = new System.Drawing.Point(366, 190);
+			this.chkAlternateMatrixAttribute.Location = new System.Drawing.Point(8, 259);
 			this.chkAlternateMatrixAttribute.Name = "chkAlternateMatrixAttribute";
 			this.chkAlternateMatrixAttribute.Size = new System.Drawing.Size(202, 17);
 			this.chkAlternateMatrixAttribute.TabIndex = 12;
@@ -2351,7 +2315,7 @@
 			// chkAllowCustomTransgenics
 			// 
 			this.chkAllowCustomTransgenics.AutoSize = true;
-			this.chkAllowCustomTransgenics.Location = new System.Drawing.Point(366, 236);
+			this.chkAllowCustomTransgenics.Location = new System.Drawing.Point(8, 305);
 			this.chkAllowCustomTransgenics.Name = "chkAllowCustomTransgenics";
 			this.chkAllowCustomTransgenics.Size = new System.Drawing.Size(297, 17);
 			this.chkAllowCustomTransgenics.TabIndex = 14;
@@ -2363,7 +2327,7 @@
 			// chkAlternateComplexFormCost
 			// 
 			this.chkAlternateComplexFormCost.AutoSize = true;
-			this.chkAlternateComplexFormCost.Location = new System.Drawing.Point(366, 213);
+			this.chkAlternateComplexFormCost.Location = new System.Drawing.Point(8, 282);
 			this.chkAlternateComplexFormCost.Name = "chkAlternateComplexFormCost";
 			this.chkAlternateComplexFormCost.Size = new System.Drawing.Size(231, 17);
 			this.chkAlternateComplexFormCost.TabIndex = 13;
@@ -2375,7 +2339,7 @@
 			// chkUseCalculatedVehicleSensorRatings
 			// 
 			this.chkUseCalculatedVehicleSensorRatings.AutoSize = true;
-			this.chkUseCalculatedVehicleSensorRatings.Location = new System.Drawing.Point(366, 167);
+			this.chkUseCalculatedVehicleSensorRatings.Location = new System.Drawing.Point(8, 236);
 			this.chkUseCalculatedVehicleSensorRatings.Name = "chkUseCalculatedVehicleSensorRatings";
 			this.chkUseCalculatedVehicleSensorRatings.Size = new System.Drawing.Size(255, 17);
 			this.chkUseCalculatedVehicleSensorRatings.TabIndex = 11;
@@ -2387,7 +2351,7 @@
 			// chkArmorDegradation
 			// 
 			this.chkArmorDegradation.AutoSize = true;
-			this.chkArmorDegradation.Location = new System.Drawing.Point(366, 144);
+			this.chkArmorDegradation.Location = new System.Drawing.Point(8, 213);
 			this.chkArmorDegradation.Name = "chkArmorDegradation";
 			this.chkArmorDegradation.Size = new System.Drawing.Size(181, 17);
 			this.chkArmorDegradation.TabIndex = 10;
@@ -2399,7 +2363,7 @@
 			// chkArmorSuitCapacity
 			// 
 			this.chkArmorSuitCapacity.AutoSize = true;
-			this.chkArmorSuitCapacity.Location = new System.Drawing.Point(366, 121);
+			this.chkArmorSuitCapacity.Location = new System.Drawing.Point(8, 190);
 			this.chkArmorSuitCapacity.Name = "chkArmorSuitCapacity";
 			this.chkArmorSuitCapacity.Size = new System.Drawing.Size(179, 17);
 			this.chkArmorSuitCapacity.TabIndex = 9;
@@ -2411,7 +2375,7 @@
 			// chkMaximumArmorModifications
 			// 
 			this.chkMaximumArmorModifications.AutoSize = true;
-			this.chkMaximumArmorModifications.Location = new System.Drawing.Point(366, 98);
+			this.chkMaximumArmorModifications.Location = new System.Drawing.Point(8, 167);
 			this.chkMaximumArmorModifications.Name = "chkMaximumArmorModifications";
 			this.chkMaximumArmorModifications.Size = new System.Drawing.Size(226, 17);
 			this.chkMaximumArmorModifications.TabIndex = 8;
@@ -2423,7 +2387,7 @@
 			// chkStrengthAffectsRecoil
 			// 
 			this.chkStrengthAffectsRecoil.AutoSize = true;
-			this.chkStrengthAffectsRecoil.Location = new System.Drawing.Point(366, 305);
+			this.chkStrengthAffectsRecoil.Location = new System.Drawing.Point(8, 374);
 			this.chkStrengthAffectsRecoil.Name = "chkStrengthAffectsRecoil";
 			this.chkStrengthAffectsRecoil.Size = new System.Drawing.Size(203, 17);
 			this.chkStrengthAffectsRecoil.TabIndex = 7;
@@ -2488,7 +2452,7 @@
 			// chkCapSkillRating
 			// 
 			this.chkCapSkillRating.AutoSize = true;
-			this.chkCapSkillRating.Location = new System.Drawing.Point(366, 6);
+			this.chkCapSkillRating.Location = new System.Drawing.Point(8, 75);
 			this.chkCapSkillRating.Name = "chkCapSkillRating";
 			this.chkCapSkillRating.Size = new System.Drawing.Size(400, 17);
 			this.chkCapSkillRating.TabIndex = 2;
@@ -2501,7 +2465,7 @@
 			// chkNoSingleArmorEncumbrance
 			// 
 			this.chkNoSingleArmorEncumbrance.AutoSize = true;
-			this.chkNoSingleArmorEncumbrance.Location = new System.Drawing.Point(366, 52);
+			this.chkNoSingleArmorEncumbrance.Location = new System.Drawing.Point(8, 121);
 			this.chkNoSingleArmorEncumbrance.Name = "chkNoSingleArmorEncumbrance";
 			this.chkNoSingleArmorEncumbrance.Size = new System.Drawing.Size(322, 17);
 			this.chkNoSingleArmorEncumbrance.TabIndex = 1;
@@ -2513,7 +2477,6 @@
 			// tabHouseRules
 			// 
 			this.tabHouseRules.BackColor = System.Drawing.SystemColors.Control;
-			this.tabHouseRules.Controls.Add(this.chkAllowCyberwareESSDiscounts);
 			this.tabHouseRules.Controls.Add(this.chkExceedNegativeQualitiesLimit);
 			this.tabHouseRules.Controls.Add(this.chkExceedNegativeQualities);
 			this.tabHouseRules.Controls.Add(this.chkExceedPositiveQualities);
@@ -2537,18 +2500,6 @@
 			this.tabHouseRules.TabIndex = 3;
 			this.tabHouseRules.Tag = "Tab_Options_HouseRules";
 			this.tabHouseRules.Text = "House Rules";
-			// 
-			// chkAllowCyberwareESSDiscounts
-			// 
-			this.chkAllowCyberwareESSDiscounts.AutoSize = true;
-			this.chkAllowCyberwareESSDiscounts.Location = new System.Drawing.Point(8, 141);
-			this.chkAllowCyberwareESSDiscounts.Name = "chkAllowCyberwareESSDiscounts";
-			this.chkAllowCyberwareESSDiscounts.Size = new System.Drawing.Size(279, 17);
-			this.chkAllowCyberwareESSDiscounts.TabIndex = 18;
-			this.chkAllowCyberwareESSDiscounts.Tag = "Checkbox_Options_AllowCyberwareESSDiscounts";
-			this.chkAllowCyberwareESSDiscounts.Text = "Allow Cyber/Bioware Essence costs to be customized";
-			this.tipTooltip.SetToolTip(this.chkAllowCyberwareESSDiscounts, "Permits adjustment of essence costs on a per-item basis.");
-			this.chkAllowCyberwareESSDiscounts.UseVisualStyleBackColor = true;
 			// 
 			// chkExceedNegativeQualitiesLimit
 			// 
@@ -2704,7 +2655,7 @@
 			this.chkAllowInitiation.TabIndex = 7;
 			this.chkAllowInitiation.Tag = "Checkbox_Options_AllowInitiation";
 			this.chkAllowInitiation.Text = "Allow Initiation/Submersion in Create mode";
-			this.tipTooltip.SetToolTip(this.chkAllowInitiation, "Allows Initiation/Submersion using Karma during Create mode.");
+			this.tipTooltip.SetToolTip(this.chkAllowInitiation, "Enabling this house rule will allow Initiation/Submersion in Create mode.");
 			this.chkAllowInitiation.UseVisualStyleBackColor = true;
 			// 
 			// chkUsePointsOnBrokenGroups
@@ -2716,7 +2667,8 @@
 			this.chkUsePointsOnBrokenGroups.TabIndex = 6;
 			this.chkUsePointsOnBrokenGroups.Tag = "Checkbox_Options_PointsOnBrokenGroups";
 			this.chkUsePointsOnBrokenGroups.Text = "Use Skill Points on broken groups";
-			this.tipTooltip.SetToolTip(this.chkUsePointsOnBrokenGroups, "Allows Skill Points to be spent on skills belonging to a broken skill group.");
+			this.tipTooltip.SetToolTip(this.chkUsePointsOnBrokenGroups, "Enabling this house rule will allow Skill Points to be spent on skills belonging " +
+        "to a broken skill group.");
 			this.chkUsePointsOnBrokenGroups.UseVisualStyleBackColor = true;
 			// 
 			// chkDontDoubleQualities
@@ -2728,8 +2680,9 @@
 			this.chkDontDoubleQualities.TabIndex = 5;
 			this.chkDontDoubleQualities.Tag = "Checkbox_Options_DontDoubleQualities";
 			this.chkDontDoubleQualities.Text = "Don\'t double the cost of Qualities in Career Mode";
-			this.tipTooltip.SetToolTip(this.chkDontDoubleQualities, "Allows characters in Career mode to purchase Positive Qualities and buy off Negat" +
-        "ive at their normal price instead of doubling them.");
+			this.tipTooltip.SetToolTip(this.chkDontDoubleQualities, "Enabling this house rule will allow characters in Career mode to purchase Positiv" +
+        "e Qualities and buy off Negative at their normal price instead of doubling them." +
+        "");
 			this.chkDontDoubleQualities.UseVisualStyleBackColor = true;
 			// 
 			// chkCyberlegMovement
@@ -2741,8 +2694,8 @@
 			this.chkCyberlegMovement.TabIndex = 2;
 			this.chkCyberlegMovement.Tag = "Checkbox_Options_CyberlegMovement";
 			this.chkCyberlegMovement.Text = "Use Cyberleg Stats for Movement";
-			this.tipTooltip.SetToolTip(this.chkCyberlegMovement, "Allows characters with two cyberlegs to use their cyberleg\'s AGI when calculating" +
-        " movement rates.");
+			this.tipTooltip.SetToolTip(this.chkCyberlegMovement, "Enabling this house rule will allow characters with two cyberlegs to use their cy" +
+        "berleg\'s AGI when calculating movement rates.");
 			this.chkCyberlegMovement.UseVisualStyleBackColor = true;
 			// 
 			// chkIgnoreArt
@@ -2754,8 +2707,8 @@
 			this.chkIgnoreArt.TabIndex = 1;
 			this.chkIgnoreArt.Tag = "Checkbox_Options_IgnoreArt";
 			this.chkIgnoreArt.Text = "Ignore Art Requirements from Street Grimoire";
-			this.tipTooltip.SetToolTip(this.chkIgnoreArt, "Allows all metamagics, enhancements, enchantments, and rituals to ignore the Art " +
-        "requirement detailed in Street Grimoire.");
+			this.tipTooltip.SetToolTip(this.chkIgnoreArt, "Enabling this house rule allows all metamagics, enhancements, enchantments, and r" +
+        "ituals to ignore the Art requirement detailed in Street Grimoire.");
 			this.chkIgnoreArt.UseVisualStyleBackColor = true;
 			// 
 			// cboSetting
@@ -2800,17 +2753,6 @@
 			this.tipTooltip.AutoPopDelay = 15000;
 			this.tipTooltip.InitialDelay = 500;
 			this.tipTooltip.ReshowDelay = 100;
-			// 
-			// chkMissions
-			// 
-			this.chkMissions.AutoSize = true;
-			this.chkMissions.Location = new System.Drawing.Point(8, 75);
-			this.chkMissions.Name = "chkMissions";
-			this.chkMissions.Size = new System.Drawing.Size(197, 17);
-			this.chkMissions.TabIndex = 33;
-			this.chkMissions.Tag = "Checkbox_Options_Missions";
-			this.chkMissions.Text = "Hide Qualities prohibited by Missions";
-			this.chkMissions.UseVisualStyleBackColor = true;
 			// 
 			// frmOptions
 			// 
@@ -2909,11 +2851,8 @@
 		private System.Windows.Forms.NumericUpDown nudKarmaCarryover;
 		private System.Windows.Forms.Label lblKarmaCarryover;
 		private System.Windows.Forms.Label lblKarmaContactExtra;
-        private System.Windows.Forms.Label lblKarmaEnemyExtra;
 		private System.Windows.Forms.NumericUpDown nudKarmaContact;
-        private System.Windows.Forms.NumericUpDown nudKarmaEnemy;
 		private System.Windows.Forms.Label lblKarmaContact;
-        private System.Windows.Forms.Label lblKarmaEnemy;
 		private System.Windows.Forms.Label lblKarmaNuyenPerExtra;
 		private System.Windows.Forms.NumericUpDown nudKarmaNuyenPer;
 		private System.Windows.Forms.Label lblKarmaNuyenPer;
@@ -3121,7 +3060,5 @@
         private System.Windows.Forms.CheckBox chkExceedNegativeQualities;
         private System.Windows.Forms.CheckBox chkExceedPositiveQualities;
 		private System.Windows.Forms.CheckBox chkLifeModule;
-		private System.Windows.Forms.CheckBox chkAllowCyberwareESSDiscounts;
-		private System.Windows.Forms.CheckBox chkMissions;
 	}
 }

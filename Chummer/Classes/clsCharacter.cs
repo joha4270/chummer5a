@@ -32,6 +32,8 @@ public delegate void CollegeEducationChangedHandler(Object sender);
 public delegate void SchoolOfHardKnocksChangedHandler(Object sender);
 // UncouthChanged Event Handler
 public delegate void UncouthChangedHandler(Object sender);
+// InfirmChanged Event Handler
+public delegate void InfirmChangedHandler(Object sender);
 // FriendsInHighPlacesChanged Event Handler
 public delegate void FriendsInHighPlacesChangedHandler(Object sender);
 // CharacterNameChanged Event Handler
@@ -89,7 +91,7 @@ namespace Chummer
         private int _intCFPLimit = 0;
         private int _intContactPoints = 0;
         private int _intContactPointsUsed = 0;
-        private int _intMetageneticLimit = 0;
+        public int metageneticLimit = 0;
 
         // General character info.
         private string _strName = "";
@@ -148,6 +150,7 @@ namespace Chummer
         private bool _blnUneducated = false;
         private bool _blnUncouth = false;
         private bool _blnSchoolOfHardKnocks = false;
+        private bool _blnInfirm = false;
         private bool _blnIsCritter = false;
         private bool _blnPossessed = false;
         private bool _blnBlackMarket = false;
@@ -155,6 +158,7 @@ namespace Chummer
         private bool _blnFriendsInHighPlaces = false;
         private bool _blnJackOfAllTrades = false;
         private bool _blnExCon = false;
+        private bool _blnTrustFund = false;
         private bool _blnTechSchool = false;
         private bool _blnRestrictedGear = false;
         private bool _blnOverclocker = false;
@@ -165,10 +169,9 @@ namespace Chummer
         private bool _blnBornRich = false;
         private bool _blnBlackMarketPipeline = false;
         private bool _blnErased = false;
-		private int _intTrustFund = 0;
 
-		// Attributes.
-		private Attribute _attBOD = new Attribute("BOD");
+        // Attributes.
+        private Attribute _attBOD = new Attribute("BOD");
         private Attribute _attAGI = new Attribute("AGI");
         private Attribute _attREA = new Attribute("REA");
         private Attribute _attSTR = new Attribute("STR");
@@ -224,7 +227,7 @@ namespace Chummer
         private string _strSkill2 = "";
         private string _strSkillGroup = "";
         private int _intMaxNuyen = 0;
-		private int _intMaxKarma = 0;
+        private int _intMaxKarma = 0;
         private int _intContactMultiplier = 0;
 
         // Lists.
@@ -245,7 +248,7 @@ namespace Chummer
         private List<Cyberware> _lstCyberware = new List<Cyberware>();
         private List<Weapon> _lstWeapons = new List<Weapon>();
         private List<Quality> _lstQualities = new List<Quality>();
-        private List<LifestyleQuality> _lstLifestyleQualities = new List<LifestyleQuality>();
+        private List<Quality> _lstLifestyleQualities = new List<Quality>();
         private List<Lifestyle> _lstLifestyles = new List<Lifestyle>();
         private List<Gear> _lstGear = new List<Gear>();
         private List<Vehicle> _lstVehicles = new List<Vehicle>();
@@ -266,35 +269,34 @@ namespace Chummer
         // Character Version
         private string _strVersionCreated = Application.ProductVersion.ToString().Replace("0.0.", string.Empty);
 
-		// Events.
-		public event AdeptTabEnabledChangedHandler AdeptTabEnabledChanged;
-		public event CollegeEducationChangedHandler CollegeEducationChanged;
-		public event CritterTabEnabledChangedHandler CritterTabEnabledChanged;
-		public event MAGEnabledChangedHandler MAGEnabledChanged;
-		public event BlackMarketEnabledChangedHandler BlackMarketEnabledChanged;
-		public event BornRichChangedHandler BornRichChanged;
-		public event CharacterNameChangedHandler CharacterNameChanged;
-		public event ErasedChangedHandler ErasedChanged;
-		public event ExConChangedHandler ExConChanged;
-		public event FameChangedHandler FameChanged;
-		public event FriendsInHighPlacesChangedHandler FriendsInHighPlacesChanged;
-		public event InitiationTabEnabledChangedHandler InitiationTabEnabledChanged;
-		public event JackOfAllTradesChangedHandler JackOfAllTradesChanged;
-		public event LightningReflexesChangedHandler LightningReflexesChanged;
-		public event LinguistChangedHandler LinguistChanged;
-		public event MadeManChangedHandler MadeManChanged;
-		public event MagicianTabEnabledChangedHandler MagicianTabEnabledChanged;
-		public event OverclockerChangedHandler OverclockerChanged;
-		public event RESEnabledChangedHandler RESEnabledChanged;
-		public event RestrictedGearChangedHandler RestrictedGearChanged;
-		public event SchoolOfHardKnocksChangedHandler SchoolOfHardKnocksChanged;
-		public event TechnomancerTabEnabledChangedHandler TechnomancerTabEnabledChanged;
-		public event TechSchoolChangedHandler TechSchoolChanged;
-		public event TrustFundChangedHandler TrustFundChanged;
-		public event UncouthChangedHandler UncouthChanged;
-		public event UneducatedChangedHandler UneducatedChanged;
+        // Events.
+        public event MAGEnabledChangedHandler MAGEnabledChanged;
+        public event RESEnabledChangedHandler RESEnabledChanged;
+        public event AdeptTabEnabledChangedHandler AdeptTabEnabledChanged;
+        public event MagicianTabEnabledChangedHandler MagicianTabEnabledChanged;
+        public event TechnomancerTabEnabledChangedHandler TechnomancerTabEnabledChanged;
+        public event InitiationTabEnabledChangedHandler InitiationTabEnabledChanged;
+        public event CritterTabEnabledChangedHandler CritterTabEnabledChanged;
+        public event UneducatedChangedHandler UneducatedChanged;
+        public event UncouthChangedHandler UncouthChanged;
+        public event SchoolOfHardKnocksChangedHandler SchoolOfHardKnocksChanged;
+        public event InfirmChangedHandler InfirmChanged;
+        public event FriendsInHighPlacesChangedHandler FriendsInHighPlacesChanged;
+        public event CharacterNameChangedHandler CharacterNameChanged;
+        public event BlackMarketEnabledChangedHandler BlackMarketEnabledChanged;
+        public event ExConChangedHandler ExConChanged;
+        public event TrustFundChangedHandler TrustFundChanged;
+        public event TechSchoolChangedHandler TechSchoolChanged;
+        public event RestrictedGearChangedHandler RestrictedGearChanged;
+        public event OverclockerChangedHandler OverclockerChanged;
+        public event MadeManChangedHandler MadeManChanged;
+        public event LinguistChangedHandler LinguistChanged;
+        public event LightningReflexesChangedHandler LightningReflexesChanged;
+        public event FameChangedHandler FameChanged;
+        public event BornRichChangedHandler BornRichChanged;
+        public event ErasedChangedHandler ErasedChanged;
 
-		private frmViewer _frmPrintView;
+        private frmViewer _frmPrintView;
 
         #region Initialization, Save, Load, Print, and Reset Methods
         /// <summary>
@@ -352,10 +354,8 @@ namespace Chummer
             objWriter.WriteElementString("metavariant", _strMetavariant);
             // <metatypecategory />
             objWriter.WriteElementString("metatypecategory", _strMetatypeCategory);
-			// <metageneticlimit />
-			objWriter.WriteElementString("metageneticlimit", _intMetageneticLimit.ToString());
-			// <movement />
-			objWriter.WriteElementString("movement", _strMovement);
+            // <movement />
+            objWriter.WriteElementString("movement", _strMovement);
             // <walk />
             objWriter.WriteElementString("walk", _strWalk);
             // <run />
@@ -428,10 +428,9 @@ namespace Chummer
                 objWriter.WriteElementString("possessed", _blnPossessed.ToString());
             if (_blnOverrideSpecialAttributeESSLoss)
                 objWriter.WriteElementString("overridespecialattributeessloss", _blnOverrideSpecialAttributeESSLoss.ToString());
-			if (_intMetageneticLimit > 0)
-				objWriter.WriteElementString("metageneticlimit", _intMetageneticLimit.ToString());
-			// <karma />
-			objWriter.WriteElementString("karma", _intKarma.ToString());
+
+            // <karma />
+            objWriter.WriteElementString("karma", _intKarma.ToString());
             // <totalkarma />
             objWriter.WriteElementString("totalkarma", _intTotalKarma.ToString());
             // <special />
@@ -525,12 +524,14 @@ namespace Chummer
             objWriter.WriteElementString("friendsinhighplaces", _blnFriendsInHighPlaces.ToString());
             // <jackofalltrades />
             objWriter.WriteElementString("jackofalltrades", _blnJackOfAllTrades.ToString());
+            // <infirm />
+            objWriter.WriteElementString("infirm", _blnInfirm.ToString());
             // <blackmarket />
             objWriter.WriteElementString("blackmarket", _blnBlackMarket.ToString());
 
             objWriter.WriteElementString("excon", _blnExCon.ToString());
 
-            objWriter.WriteElementString("trustfund", _intTrustFund.ToString());
+            objWriter.WriteElementString("trustfund", _blnTrustFund.ToString());
 
             objWriter.WriteElementString("techschool", _blnTechSchool.ToString());
 
@@ -924,11 +925,10 @@ namespace Chummer
         /// </summary>
         public bool Load()
         {
-			Timekeeper.Start("load_xml");
+
             XmlDocument objXmlDocument = new XmlDocument();
             objXmlDocument.Load(_strFileName);
-	        Timekeeper.Finish("load_xml");
-			Timekeeper.Start("load_char_misc");
+
             XmlNode objXmlCharacter = objXmlDocument.SelectSingleNode("/character");
             XmlNodeList objXmlNodeList;
 
@@ -1224,15 +1224,7 @@ namespace Chummer
             {
             }
 
-
-			try
-			{
-				_intMetageneticLimit = Convert.ToInt32(objXmlCharacter["metageneticlimit"].InnerText);
-			}
-			catch
-			{
-			}
-			try
+            try
             {
                 _blnPossessed = Convert.ToBoolean(objXmlCharacter["possessed"].InnerText);
             }
@@ -1506,6 +1498,13 @@ namespace Chummer
             }
             try
             {
+                _blnInfirm = Convert.ToBoolean(objXmlCharacter["infirm"].InnerText);
+            }
+            catch
+            {
+            }
+            try
+            {
                 _blnBlackMarket = Convert.ToBoolean(objXmlCharacter["blackmarket"].InnerText);
             }
             catch
@@ -1520,7 +1519,7 @@ namespace Chummer
             }
             try
             {
-                _intTrustFund = Convert.ToInt32(objXmlCharacter["trustfund"].InnerText);
+                _blnTrustFund = Convert.ToBoolean(objXmlCharacter["trustfund"].InnerText);
             }
             catch
             {
@@ -1619,8 +1618,7 @@ namespace Chummer
             catch
             {
             }
-	        Timekeeper.Finish("load_char_misc");
-			Timekeeper.Start("load_char_imp");
+
             // Improvements.
             XmlNodeList objXmlImprovementList = objXmlDocument.SelectNodes("/character/improvements/improvement");
             foreach (XmlNode objXmlImprovement in objXmlImprovementList)
@@ -1629,8 +1627,7 @@ namespace Chummer
                 objImprovement.Load(objXmlImprovement);
                 _lstImprovements.Add(objImprovement);
             }
-	        Timekeeper.Finish("load_char_imp");
-			Timekeeper.Start("load_char_quality");
+
             // Qualities
             objXmlNodeList = objXmlDocument.SelectNodes("/character/qualities/quality");
             bool blnHasOldQualities = false;
@@ -1651,8 +1648,7 @@ namespace Chummer
             // If old Qualities are in use, they need to be converted before we can continue.
             if (blnHasOldQualities)
                 ConvertOldQualities(objXmlNodeList);
-	        Timekeeper.Finish("load_char_quality");
-			Timekeeper.Start("load_char_attrib");
+
             // Attributes.
             objXmlCharacter = objXmlDocument.SelectSingleNode("/character/attributes/attribute[name = \"BOD\"]");
             _attBOD.Load(objXmlCharacter);
@@ -1690,9 +1686,6 @@ namespace Chummer
             catch
             {
             }
-
-	        Timekeeper.Finish("load_char_attrib");
-			Timekeeper.Start("load_char_misc2");
 
             // Force.
             try
@@ -1798,12 +1791,9 @@ namespace Chummer
             catch
             {
             }
-	        Timekeeper.Finish("load_char_misc2");
-			Timekeeper.Start("load_char_skills");
-			Timekeeper.Start("load_char_skills_normal");
 
-			// Skills.
-			foreach (Skill objSkill in _lstSkills)
+            // Skills.
+            foreach (Skill objSkill in _lstSkills)
             {
                 XmlNode objXmlSkill = objXmlDocument.SelectSingleNode("/character/skills/skill[name = \"" + objSkill.Name + "\"]");
                 if (objXmlSkill != null)
@@ -1812,11 +1802,8 @@ namespace Chummer
                 }
             }
 
-			Timekeeper.Finish("load_char_skills_normal");
-			Timekeeper.Start("load_char_skills_exotic");
-
-			// Exotic Skills.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/skills/skill[exotic = \"True\"]");
+            // Exotic Skills.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/skills/skill[exotic = \"True\"]");
             foreach (XmlNode objXmlSkill in objXmlNodeList)
             {
                 Skill objSkill = new Skill(this);
@@ -1824,10 +1811,8 @@ namespace Chummer
                 _lstSkills.Add(objSkill);
             }
 
-			Timekeeper.Finish("load_char_skills_exotic");
-			Timekeeper.Start("load_char_skills_group");
-			// SkillGroups.
-			foreach (SkillGroup objGroup in _lstSkillGroups)
+            // SkillGroups.
+            foreach (SkillGroup objGroup in _lstSkillGroups)
             {
                 XmlNode objXmlSkill = objXmlDocument.SelectSingleNode("/character/skillgroups/skillgroup[name = \"" + objGroup.Name + "\"]");
                 if (objXmlSkill != null)
@@ -1839,12 +1824,8 @@ namespace Chummer
                 }
             }
 
-			Timekeeper.Finish("load_char_skills_group");
-			Timekeeper.Start("load_char_skills_fix");
-
-
-			// Apply the broken skill group fix
-			foreach (Skill objSkill in _lstSkills)
+            // Apply the broken skill group fix
+            foreach (Skill objSkill in _lstSkills)
             {
                 foreach (SkillGroup objGroup in _lstSkillGroups)
                 {
@@ -1862,11 +1843,9 @@ namespace Chummer
                 if (objGroup.Base == 0 && objGroup.Karma == 0 && objGroup.Rating > 0)
                     objGroup.Base = objGroup.Rating;
             }
-			Timekeeper.Finish("load_char_skills_fix");
-			Timekeeper.Start("load_char_skills_kno");
 
-			// Knowledge Skills.
-			List<ListItem> lstKnowledgeSkillOrder = new List<ListItem>();
+            // Knowledge Skills.
+            List<ListItem> lstKnowledgeSkillOrder = new List<ListItem>();
             objXmlNodeList = objXmlDocument.SelectNodes("/character/skills/skill[knowledge = \"True\"]");
             // Sort the Knowledge Skills in alphabetical order.
             foreach (XmlNode objXmlSkill in objXmlNodeList)
@@ -1887,13 +1866,8 @@ namespace Chummer
                 _lstSkills.Add(objSkill);
             }
 
-			Timekeeper.Finish("load_char_skills_kno");
-			Timekeeper.Finish("load_char_skills");
-			Timekeeper.Start("load_char_contacts");
-
-
-			// Contacts.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/contacts/contact");
+            // Contacts.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/contacts/contact");
             foreach (XmlNode objXmlContact in objXmlNodeList)
             {
                 Contact objContact = new Contact(this);
@@ -1901,8 +1875,6 @@ namespace Chummer
                 _lstContacts.Add(objContact);
             }
 
-	        Timekeeper.Finish("load_char_contacts");
-			Timekeeper.Start("load_char_armor");
             // Armor.
             objXmlNodeList = objXmlDocument.SelectNodes("/character/armors/armor");
             foreach (XmlNode objXmlArmor in objXmlNodeList)
@@ -1911,11 +1883,9 @@ namespace Chummer
                 objArmor.Load(objXmlArmor);
                 _lstArmor.Add(objArmor);
             }
-			Timekeeper.Finish("load_char_armor");
-			Timekeeper.Start("load_char_weapons");
 
-			// Weapons.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/weapons/weapon");
+            // Weapons.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/weapons/weapon");
             foreach (XmlNode objXmlWeapon in objXmlNodeList)
             {
                 Weapon objWeapon = new Weapon(this);
@@ -1923,11 +1893,8 @@ namespace Chummer
                 _lstWeapons.Add(objWeapon);
             }
 
-			Timekeeper.Finish("load_char_weapons");
-			Timekeeper.Start("load_char_ware");
-
-			// Cyberware/Bioware.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/cyberwares/cyberware");
+            // Cyberware/Bioware.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/cyberwares/cyberware");
             foreach (XmlNode objXmlCyberware in objXmlNodeList)
             {
                 Cyberware objCyberware = new Cyberware(this);
@@ -1935,11 +1902,8 @@ namespace Chummer
                 _lstCyberware.Add(objCyberware);
             }
 
-			Timekeeper.Finish("load_char_ware");
-			Timekeeper.Start("load_char_spells");
-
-			// Spells.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/spells/spell");
+            // Spells.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/spells/spell");
             foreach (XmlNode objXmlSpell in objXmlNodeList)
             {
                 Spell objSpell = new Spell(this);
@@ -1947,11 +1911,8 @@ namespace Chummer
                 _lstSpells.Add(objSpell);
             }
 
-			Timekeeper.Finish("load_char_spells");
-			Timekeeper.Start("load_char_foci");
-
-			// Foci.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/foci/focus");
+            // Foci.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/foci/focus");
             foreach (XmlNode objXmlFocus in objXmlNodeList)
             {
                 Focus objFocus = new Focus();
@@ -1959,11 +1920,8 @@ namespace Chummer
                 _lstFoci.Add(objFocus);
             }
 
-			Timekeeper.Finish("load_char_foci");
-			Timekeeper.Start("load_char_sfoci");
-
-			// Stacked Foci.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/stackedfoci/stackedfocus");
+            // Stacked Foci.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/stackedfoci/stackedfocus");
             foreach (XmlNode objXmlStack in objXmlNodeList)
             {
                 StackedFocus objStack = new StackedFocus(this);
@@ -1971,11 +1929,8 @@ namespace Chummer
                 _lstStackedFoci.Add(objStack);
             }
 
-			Timekeeper.Finish("load_char_sfoci");
-			Timekeeper.Start("load_char_powers");
-
-			// Powers.
-			List<ListItem> lstPowerOrder = new List<ListItem>();
+            // Powers.
+            List<ListItem> lstPowerOrder = new List<ListItem>();
             objXmlNodeList = objXmlDocument.SelectNodes("/character/powers/power");
             // Sort the Powers in alphabetical order.
             foreach (XmlNode objXmlPower in objXmlNodeList)
@@ -1997,11 +1952,8 @@ namespace Chummer
                 _lstPowers.Add(objPower);
             }
 
-			Timekeeper.Finish("load_char_powers");
-			Timekeeper.Start("load_char_spirits");
-
-			// Spirits/Sprites.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/spirits/spirit");
+            // Spirits/Sprites.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/spirits/spirit");
             foreach (XmlNode objXmlSpirit in objXmlNodeList)
             {
                 Spirit objSpirit = new Spirit(this);
@@ -2009,11 +1961,8 @@ namespace Chummer
                 _lstSpirits.Add(objSpirit);
             }
 
-			Timekeeper.Finish("load_char_spirits");
-			Timekeeper.Start("load_char_complex");
-
-			// Compex Forms/Technomancer Programs.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/complexforms/complexform");
+            // Compex Forms/Technomancer Programs.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/complexforms/complexform");
             foreach (XmlNode objXmlProgram in objXmlNodeList)
             {
                 ComplexForm objProgram = new ComplexForm(this);
@@ -2021,11 +1970,8 @@ namespace Chummer
                 _lstComplexForms.Add(objProgram);
             }
 
-			Timekeeper.Finish("load_char_complex");
-			Timekeeper.Start("load_char_marts");
-
-			// Martial Arts.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/martialarts/martialart");
+            // Martial Arts.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/martialarts/martialart");
             foreach (XmlNode objXmlArt in objXmlNodeList)
             {
                 MartialArt objMartialArt = new MartialArt(this);
@@ -2033,11 +1979,8 @@ namespace Chummer
                 _lstMartialArts.Add(objMartialArt);
             }
 
-			Timekeeper.Finish("load_char_marts");
-			Timekeeper.Start("load_char_mam");
-
-			// Martial Art Maneuvers.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/martialartmaneuvers/martialartmaneuver");
+            // Martial Art Maneuvers.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/martialartmaneuvers/martialartmaneuver");
             foreach (XmlNode objXmlManeuver in objXmlNodeList)
             {
                 MartialArtManeuver objManeuver = new MartialArtManeuver(this);
@@ -2045,11 +1988,8 @@ namespace Chummer
                 _lstMartialArtManeuvers.Add(objManeuver);
             }
 
-			Timekeeper.Finish("load_char_mam");
-			Timekeeper.Start("load_char_mod");
-
-			// Limit Modifiers.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/limitmodifiers/limitmodifier");
+            // Limit Modifiers.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/limitmodifiers/limitmodifier");
             foreach (XmlNode objXmlLimit in objXmlNodeList)
             {
                 LimitModifier obLimitModifier = new LimitModifier(this);
@@ -2057,11 +1997,8 @@ namespace Chummer
                 _lstLimitModifiers.Add(obLimitModifier);
             }
 
-			Timekeeper.Finish("load_char_mod");
-			Timekeeper.Start("load_char_lifestyle");
-
-			// Lifestyles.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/lifestyles/lifestyle");
+            // Lifestyles.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/lifestyles/lifestyle");
             foreach (XmlNode objXmlLifestyle in objXmlNodeList)
             {
                 Lifestyle objLifestyle = new Lifestyle(this);
@@ -2069,11 +2006,8 @@ namespace Chummer
                 _lstLifestyles.Add(objLifestyle);
             }
 
-			Timekeeper.Finish("load_char_lifestyle");
-			Timekeeper.Start("load_char_gear");
-
-			// <gears>
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/gears/gear");
+            // <gears>
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/gears/gear");
             foreach (XmlNode objXmlGear in objXmlNodeList)
             {
                 switch (objXmlGear["category"].InnerText)
@@ -2093,11 +2027,8 @@ namespace Chummer
                 }
             }
 
-			Timekeeper.Finish("load_char_gear");
-			Timekeeper.Start("load_char_car");
-
-			// Vehicles.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/vehicles/vehicle");
+            // Vehicles.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/vehicles/vehicle");
             foreach (XmlNode objXmlVehicle in objXmlNodeList)
             {
                 Vehicle objVehicle = new Vehicle(this);
@@ -2105,10 +2036,8 @@ namespace Chummer
                 _lstVehicles.Add(objVehicle);
             }
 
-			Timekeeper.Finish("load_char_car");
-			Timekeeper.Start("load_char_mmagic");
-			// Metamagics/Echoes.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/metamagics/metamagic");
+            // Metamagics/Echoes.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/metamagics/metamagic");
             foreach (XmlNode objXmlMetamagic in objXmlNodeList)
             {
                 Metamagic objMetamagic = new Metamagic(this);
@@ -2116,11 +2045,8 @@ namespace Chummer
                 _lstMetamagics.Add(objMetamagic);
             }
 
-			Timekeeper.Finish("load_char_mmagic");
-			Timekeeper.Start("load_char_arts");
-
-			// Arts
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/arts/art");
+            // Arts
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/arts/art");
             foreach (XmlNode objXmlArt in objXmlNodeList)
             {
                 Art objArt = new Art(this);
@@ -2128,11 +2054,8 @@ namespace Chummer
                 _lstArts.Add(objArt);
             }
 
-			Timekeeper.Finish("load_char_arts");
-			Timekeeper.Start("load_char_ench");
-
-			// Enhancements
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/enhancements/enhancement");
+            // Enhancements
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/enhancements/enhancement");
             foreach (XmlNode objXmlEnhancement in objXmlNodeList)
             {
                 Enhancement objEnhancement = new Enhancement(this);
@@ -2140,11 +2063,8 @@ namespace Chummer
                 _lstEnhancements.Add(objEnhancement);
             }
 
-			Timekeeper.Finish("load_char_ench");
-			Timekeeper.Start("load_char_cpow");
-
-			// Critter Powers.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/critterpowers/critterpower");
+            // Critter Powers.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/critterpowers/critterpower");
             foreach (XmlNode objXmlPower in objXmlNodeList)
             {
                 CritterPower objPower = new CritterPower(this);
@@ -2152,11 +2072,8 @@ namespace Chummer
                 _lstCritterPowers.Add(objPower);
             }
 
-			Timekeeper.Finish("load_char_cpow");
-			Timekeeper.Start("load_char_init");
-
-			// Initiation Grades.
-			objXmlNodeList = objXmlDocument.SelectNodes("/character/initiationgrades/initiationgrade");
+            // Initiation Grades.
+            objXmlNodeList = objXmlDocument.SelectNodes("/character/initiationgrades/initiationgrade");
             foreach (XmlNode objXmlGrade in objXmlNodeList)
             {
                 InitiationGrade objGrade = new InitiationGrade(this);
@@ -2164,11 +2081,8 @@ namespace Chummer
                 _lstInitiationGrades.Add(objGrade);
             }
 
-			Timekeeper.Finish("load_char_init");
-			Timekeeper.Start("load_char_elog");
-
-			// Expense Log Entries.
-			XmlNodeList objXmlExpenseList = objXmlDocument.SelectNodes("/character/expenses/expense");
+            // Expense Log Entries.
+            XmlNodeList objXmlExpenseList = objXmlDocument.SelectNodes("/character/expenses/expense");
             foreach (XmlNode objXmlExpense in objXmlExpenseList)
             {
                 ExpenseLogEntry objExpenseLogEntry = new ExpenseLogEntry();
@@ -2176,51 +2090,36 @@ namespace Chummer
                 _lstExpenseLog.Add(objExpenseLogEntry);
             }
 
-			Timekeeper.Finish("load_char_elog");
-			Timekeeper.Start("load_char_loc");
-
-			// Locations.
-			XmlNodeList objXmlLocationList = objXmlDocument.SelectNodes("/character/locations/location");
+            // Locations.
+            XmlNodeList objXmlLocationList = objXmlDocument.SelectNodes("/character/locations/location");
             foreach (XmlNode objXmlLocation in objXmlLocationList)
             {
                 _lstLocations.Add(objXmlLocation.InnerText);
             }
 
-			Timekeeper.Finish("load_char_loc");
-			Timekeeper.Start("load_char_abundle");
-
-			// Armor Bundles.
-			XmlNodeList objXmlBundleList = objXmlDocument.SelectNodes("/character/armorbundles/armorbundle");
+            // Armor Bundles.
+            XmlNodeList objXmlBundleList = objXmlDocument.SelectNodes("/character/armorbundles/armorbundle");
             foreach (XmlNode objXmlBundle in objXmlBundleList)
             {
                 _lstArmorBundles.Add(objXmlBundle.InnerText);
             }
 
-			Timekeeper.Finish("load_char_abundle");
-			Timekeeper.Start("load_char_wloc");
-
-			// Weapon Locations.
-			XmlNodeList objXmlWeaponLocationList = objXmlDocument.SelectNodes("/character/weaponlocations/weaponlocation");
+            // Weapon Locations.
+            XmlNodeList objXmlWeaponLocationList = objXmlDocument.SelectNodes("/character/weaponlocations/weaponlocation");
             foreach (XmlNode objXmlLocation in objXmlWeaponLocationList)
             {
                 _lstWeaponLocations.Add(objXmlLocation.InnerText);
             }
 
-			Timekeeper.Finish("load_char_wloc");
-			Timekeeper.Start("load_char_igroup");
-
-			// Improvement Groups.
-			XmlNodeList objXmlGroupList = objXmlDocument.SelectNodes("/character/improvementgroups/improvementgroup");
+            // Improvement Groups.
+            XmlNodeList objXmlGroupList = objXmlDocument.SelectNodes("/character/improvementgroups/improvementgroup");
             foreach (XmlNode objXmlGroup in objXmlGroupList)
             {
                 _lstImprovementGroups.Add(objXmlGroup.InnerText);
             }
 
-			Timekeeper.Finish("load_char_igroup");
-			Timekeeper.Start("load_char_calendar");
-
-			// Calendar.
-			XmlNodeList objXmlWeekList = objXmlDocument.SelectNodes("/character/calendar/week");
+            // Calendar.
+            XmlNodeList objXmlWeekList = objXmlDocument.SelectNodes("/character/calendar/week");
             foreach (XmlNode objXmlWeek in objXmlWeekList)
             {
                 CalendarWeek objWeek = new CalendarWeek();
@@ -2228,11 +2127,8 @@ namespace Chummer
                 _lstCalendar.Add(objWeek);
             }
 
-			Timekeeper.Finish("load_char_calendar");
-			Timekeeper.Start("load_char_unarmed");
-
-			// Look for the unarmed attack
-			bool blnFoundUnarmed = false;
+            // Look for the unarmed attack
+            bool blnFoundUnarmed = false;
             foreach (Weapon objWeapon in _lstWeapons)
             {
                 if (objWeapon.Name == "Unarmed Attack")
@@ -2257,21 +2153,13 @@ namespace Chummer
                 }
             }
 
-			Timekeeper.Finish("load_char_unarmed");
-			Timekeeper.Start("load_char_dwarffix");
-
-			// converting from old dwarven resistance to new dwarven resistance
-			if (this.Metatype.ToLower().Equals("dwarf")
+            // converting from old dwarven resistance to new dwarven resistance
+            if (this.Metatype.ToLower().Equals("dwarf")
                 && this.Qualities.Where(x => x.Name.Equals("Dwarf Resistance")).FirstOrDefault() == null
                 && this.Qualities.Where(x => x.Name.Equals("Resistance to Pathogens and Toxins")).FirstOrDefault() != null)
             {
                 this.Qualities.Remove(this.Qualities.Where(x => x.Name.Equals("Resistance to Pathogens and Toxins")).First());
-                XmlNode objXmlDwarfQuality = XmlManager.Instance.Load("qualities.xml").SelectSingleNode("/chummer/qualities/quality[name = \"Resistance to Pathogens/Toxins\"]");
-
-                if (objXmlDwarfQuality==null)
-                    objXmlDwarfQuality = XmlManager.Instance.Load("qualities.xml").SelectSingleNode("/chummer/qualities/quality[name = \"Dwarf Resistance\"]");
-                
-
+                XmlNode objXmlDwarfQuality = XmlManager.Instance.Load("qualities.xml").SelectSingleNode("/chummer/qualities/quality[name = \"Dwarf Resistance\"]");
 
                 TreeNode objNode = new TreeNode();
                 List<Weapon> objWeapons = new List<Weapon>();
@@ -2284,11 +2172,8 @@ namespace Chummer
             }
 
 
-			Timekeeper.Finish("load_char_dwarffix");
-			Timekeeper.Start("load_char_cfix");
-
-			// load issue where the contact multiplier was set to 0
-			if (_intContactMultiplier == 0 && _strGameplayOption != string.Empty)
+            // load issue where the contact multiplier was set to 0
+            if (_intContactMultiplier == 0 && _strGameplayOption != string.Empty)
             {
                 XmlDocument objXmlDocumentPriority = XmlManager.Instance.Load("gameplayoptions.xml");
                 XmlNode objXmlGameplayOption = objXmlDocumentPriority.SelectSingleNode("/chummer/gameplayoptions/gameplayoption[name = \"" + _strGameplayOption + "\"]");
@@ -2310,21 +2195,11 @@ namespace Chummer
                 _intContactPoints = (CHA.Base + CHA.Karma) * _intContactMultiplier;
             }
 
-			Timekeeper.Finish("load_char_cfix");
-			
+            // If the character had old Qualities that were converted, immediately save the file so they are in the new format.
+            if (blnHasOldQualities)
+                Save();
 
-			// If the character had old Qualities that were converted, immediately save the file so they are in the new format.
-	        if (blnHasOldQualities)
-	        {
-				Timekeeper.Start("load_char_resav");
-				
-
-				Save();
-				Timekeeper.Finish("load_char_resav");
-				
-
-			}
-	        return true;
+            return true;
         }
 
         /// <summary>
@@ -2434,16 +2309,14 @@ namespace Chummer
             string strMugshotPath = "";
             if (_strMugshot != "")
             {
-				string mugshotsDirectoryPath = Path.Combine(Environment.CurrentDirectory, "mugshots");
-                if (!Directory.Exists(mugshotsDirectoryPath))
-                    Directory.CreateDirectory(mugshotsDirectoryPath);
+                if (!Directory.Exists(Environment.CurrentDirectory + Path.DirectorySeparatorChar + "mugshots"))
+                    Directory.CreateDirectory(Environment.CurrentDirectory + Path.DirectorySeparatorChar + "mugshots");
                 byte[] bytImage = Convert.FromBase64String(_strMugshot);
                 MemoryStream objImageStream = new MemoryStream(bytImage, 0, bytImage.Length);
                 objImageStream.Write(bytImage, 0, bytImage.Length);
                 Image imgMugshot = Image.FromStream(objImageStream, true);
-	            string imgMugshotPath = Path.Combine(mugshotsDirectoryPath, guiImage + ".img");
-                imgMugshot.Save(imgMugshotPath);
-                strMugshotPath = "file://" + imgMugshotPath.Replace(Path.DirectorySeparatorChar, '/');
+                imgMugshot.Save(Environment.CurrentDirectory + Path.DirectorySeparatorChar + "mugshots" + Path.DirectorySeparatorChar + guiImage.ToString() + ".img");
+                strMugshotPath = "file://" + (Environment.CurrentDirectory + Path.DirectorySeparatorChar + "mugshots" + Path.DirectorySeparatorChar + guiImage.ToString() + ".img").Replace(Path.DirectorySeparatorChar, '/');
             }
             // <mugshot />
             objWriter.WriteElementString("mugshot", strMugshotPath);
@@ -4382,27 +4255,12 @@ namespace Chummer
             {
                 _blnIsCritter = value;
             }
-		}
+        }
 
-		/// <summary>
-		/// The highest number of free metagenetic qualities the character can have.
-		/// </summary>
-		public int MetageneticLimit
-		{
-			get
-			{
-				return _intMetageneticLimit;
-			}
-			set
-			{
-				_intMetageneticLimit = value;
-			}
-		}
-
-		/// <summary>
-		/// Whether or not the character is possessed by a Spirit.
-		/// </summary>
-		public bool Possessed
+        /// <summary>
+        /// Whether or not the character is possessed by a Spirit.
+        /// </summary>
+        public bool Possessed
         {
             get
             {
@@ -5610,7 +5468,10 @@ namespace Chummer
                 double dblAwareness = Convert.ToDouble(TotalStreetCred, GlobalOptions.Instance.CultureInfo) + Convert.ToDouble(TotalNotoriety, GlobalOptions.Instance.CultureInfo);
                 dblAwareness = Math.Floor(dblAwareness / 3);
 
-                int intReturn = 0;
+                int intReturn = Convert.ToInt32(dblAwareness);
+
+                if (intReturn < 0)
+                    intReturn = 0;
 
                 return intReturn;
             }
@@ -5623,7 +5484,7 @@ namespace Chummer
         {
             get
             {
-                return PublicAwareness;
+                return Math.Max(CalculatedPublicAwareness + PublicAwareness, 0);
             }
         }
 
@@ -5636,7 +5497,7 @@ namespace Chummer
             {
                 string strReturn = "";
 
-                //strReturn += "(" + LanguageManager.Instance.GetString("String_StreetCred") + " (" + TotalStreetCred.ToString() + ") + " + LanguageManager.Instance.GetString("String_Notoriety") + " (" + TotalNotoriety.ToString() + ")) ÷ 3";
+                strReturn += "(" + LanguageManager.Instance.GetString("String_StreetCred") + " (" + TotalStreetCred.ToString() + ") + " + LanguageManager.Instance.GetString("String_Notoriety") + " (" + TotalNotoriety.ToString() + ")) ÷ 3";
 
                 return strReturn;
             }
@@ -5938,7 +5799,7 @@ namespace Chummer
         /// <summary>
         /// Qualities (Positive and Negative).
         /// </summary>
-        public List<LifestyleQuality> LifestyleQualities
+        public List<Quality> LifestyleQualities
         {
             get
             {
@@ -7111,7 +6972,7 @@ namespace Chummer
                 try
                 {
                     if (blnOldValue != value) { }
-                    JackOfAllTradesChanged(this);
+                    //JackOfAllTradesChanged(this);
                 }
                 catch
                 {
@@ -7120,7 +6981,7 @@ namespace Chummer
         }
 
         /// <summary>
-        /// Whether or not College Education is enabled.
+        /// Whether or not Friends in High Places is enabled.
         /// </summary>
         public bool CollegeEducation
         {
@@ -7135,7 +6996,7 @@ namespace Chummer
                 try
                 {
                     if (blnOldValue != value) { }
-                    CollegeEducationChanged(this);
+                    //CollegeEducationChanged(this);
                 }
                 catch
                 {
@@ -7213,6 +7074,29 @@ namespace Chummer
             }
         }
         /// <summary>
+        /// Whether or not Infirm is enabled.
+        /// </summary>
+        public bool Infirm
+        {
+            get
+            {
+                return _blnInfirm;
+            }
+            set
+            {
+                bool blnOldValue = _blnInfirm;
+                _blnInfirm = value;
+                try
+                {
+                    if (blnOldValue != value)
+                        InfirmChanged(this);
+                }
+                catch
+                {
+                }
+            }
+        }
+        /// <summary>
         /// Whether or not ExCon is enabled.
         /// </summary>
         public bool ExCon
@@ -7236,21 +7120,21 @@ namespace Chummer
             }
         }
         /// <summary>
-        /// Value of the Trust Fund quality.
+        /// Whether or not TrustFund is enabled.
         /// </summary>
-        public int TrustFund
+        public bool TrustFund
         {
             get
             {
-                return _intTrustFund;
+                return _blnTrustFund;
             }
             set
             {
-				int intOldValue = _intTrustFund;
-				_intTrustFund = value;
+                bool blnOldValue = _blnTrustFund;
+                _blnTrustFund = value;
                 try
                 {
-                    if (intOldValue != value)
+                    if (blnOldValue != value)
                         TrustFundChanged(this);
                 }
                 catch

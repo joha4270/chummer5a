@@ -92,7 +92,6 @@ namespace Chummer
 		private static bool _blnDatesIncludeTime = true;
 		private static bool _blnPrintToFileFirst = false;
 		private static bool _lifeModuleEnabled;
-		private static bool _blnMissionsOnly = false;
 
 		// Omae Information.
 		private static string _strOmaeUserName = "";
@@ -115,9 +114,8 @@ namespace Chummer
 		#region Constructor and Instance
 		static GlobalOptions()
 		{
-			string settingsDirectoryPath = Path.Combine(Environment.CurrentDirectory, "settings");
-            if (!Directory.Exists(settingsDirectoryPath))
-				Directory.CreateDirectory(settingsDirectoryPath);
+			if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, "settings")))
+				Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "settings"));
 
 			// Automatic Update.
 			try
@@ -163,12 +161,6 @@ namespace Chummer
 			catch
 			{
 			}
-
-			try
-			{
-				_blnMissionsOnly = Convert.ToBoolean(Registry.CurrentUser.CreateSubKey("Software\\Chummer5").GetValue("missionsonly").ToString());
-			}
-			catch { }
 
 			// Whether or not printouts should be sent to a file before loading them in the browser. This is a fix for getting printing to work properly on Linux using Wine.
 			try
@@ -365,19 +357,6 @@ namespace Chummer
 				_blnDatesIncludeTime = value;
 			}
 		}
-
-		public bool MissionsOnly {
-			get
-			{
-				return _blnMissionsOnly;
-				
-			}
-			set
-			{
-				_blnMissionsOnly = value;
-			}
-		}
-		
 
 		/// <summary>
 		/// Whether or not printouts should be sent to a file before loading them in the browser. This is a fix for getting printing to work properly on Linux using Wine.
@@ -806,7 +785,7 @@ namespace Chummer
 		private string _strFileName = "default.xml";
 		private string _strName = "Default Settings";
 
-		// Settings.
+        // Settings.
         private bool _blnAllow2ndMaxAttribute = false;
         private bool _blnAllowAttributePointsOnExceptional = false;
         private bool _blnAllowBiowareSuites = false;
@@ -879,7 +858,7 @@ namespace Chummer
         private int _intForbiddenCostMultiplier = 1;
         private int _intFreeContactsFlatNumber = 0;
         private int _intFreeContactsMultiplier = 3;
-        private int _intFreeKnowledgeMultiplier = 2;
+        private int _intFreeKnowledgeMultiplier = 3;
         private int _intLimbCount = 6;
         private int _intMetatypeCostMultiplier = 1;
         private int _intNuyenPerBP = 2000;
@@ -912,7 +891,6 @@ namespace Chummer
         private int _intKarmaComplexFormOption = 2;
         private int _intKarmaComplexFormSkillfot = 1;
         private int _intKarmaContact = 1;
-        private int _intKarmaEnemy = 1;
         private int _intKarmaEnhancement = 2;
         private int _intKarmaImproveActiveSkill = 2;
         private int _intKarmaImproveComplexForm = 1;
@@ -921,7 +899,7 @@ namespace Chummer
         private int _intKarmaInitiation = 3;
         private int _intKarmaJoinGroup = 5;
         private int _intKarmaLeaveGroup = 1;
-        private int _intKarmaManeuver = 5;
+        private int _intKarmaManeuver = 4;
         private int _intKarmaMetamagic = 15;
         private int _intKarmaNewActiveSkill = 2;
         private int _intKarmaNewComplexForm = 4;
@@ -963,12 +941,12 @@ namespace Chummer
 		public CharacterOptions()
 		{
 			// Create the settings directory if it does not exist.
-			string settingsDirectoryPath = Path.Combine(Environment.CurrentDirectory, "settings");
-			if (!Directory.Exists(settingsDirectoryPath))
-				Directory.CreateDirectory(settingsDirectoryPath);
+			if (!Directory.Exists(Path.Combine(Environment.CurrentDirectory, "settings")))
+				Directory.CreateDirectory(Path.Combine(Environment.CurrentDirectory, "settings"));
 
 			// If the default.xml settings file does not exist, attempt to read the settings from the Registry (old storage format), then save them to the default.xml file.
-			string strFilePath = Path.Combine(settingsDirectoryPath, "default.xml");
+			string strFilePath = Path.Combine(Environment.CurrentDirectory, "settings");
+			strFilePath = Path.Combine(strFilePath, "default.xml");
 			if (!File.Exists(strFilePath))
 			{
 				_strFileName = "default.xml";
@@ -977,6 +955,7 @@ namespace Chummer
 			}
 			else
 				Load("default.xml");
+
 			// Load the language file.
 			LanguageManager.Instance.Load(GlobalOptions.Instance.Language, this);
 
@@ -989,7 +968,8 @@ namespace Chummer
 		/// </summary>
 		public void Save()
 		{
-			string strFilePath = Path.Combine(Environment.CurrentDirectory, "settings", _strFileName);
+			string strFilePath = Path.Combine(Environment.CurrentDirectory, "settings");
+			strFilePath = Path.Combine(strFilePath, _strFileName);
 			FileStream objStream = new FileStream(strFilePath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
 			XmlTextWriter objWriter = new XmlTextWriter(objStream, Encoding.Unicode);
 			objWriter.Formatting = Formatting.Indented;
@@ -1225,9 +1205,7 @@ namespace Chummer
 			objWriter.WriteElementString("karmanuyenper", _intKarmaNuyenPer.ToString());
 			// <karmacontact />
 			objWriter.WriteElementString("karmacontact", _intKarmaContact.ToString());
-            // <karmaenemy />
-            objWriter.WriteElementString("karmaenemy", _intKarmaEnemy.ToString());
-            // <karmacarryover />
+			// <karmacarryover />
 			objWriter.WriteElementString("karmacarryover", _intKarmaCarryover.ToString());
 			// <karmaspirit />
 			objWriter.WriteElementString("karmaspirit", _intKarmaSpirit.ToString());
@@ -1313,7 +1291,8 @@ namespace Chummer
 		public bool Load(string strFileName)
 		{
 			_strFileName = strFileName;
-			string strFilePath = Path.Combine(Environment.CurrentDirectory, "settings", _strFileName);
+			string strFilePath = Path.Combine(Environment.CurrentDirectory, "settings");
+			strFilePath = Path.Combine(strFilePath, _strFileName);
 			XmlDocument objXmlDocument = new XmlDocument();
 			try
 			{
@@ -1457,7 +1436,7 @@ namespace Chummer
 		        // Free Contacts Multiplier
 		        _intFreeKnowledgeMultiplier =
 		            Convert.ToInt32(objXmlDocument.SelectSingleNode("/settings/freekarmaknowledgemultiplier").InnerText);
-				// No Single Armor Encumbrance
+		        // No Single Armor Encumbrance
 		        _blnNoSingleArmorEncumbrance =
 		            Convert.ToBoolean(objXmlDocument.SelectSingleNode("/settings/nosinglearmorencumbrance").InnerText);
 		        // Ignore Armor Encumbrance
@@ -1905,13 +1884,6 @@ namespace Chummer
 			_intKarmaImproveComplexForm = Convert.ToInt32(objXmlDocument.SelectSingleNode("/settings/karmacost/karmaimprovecomplexform").InnerText);
 			_intKarmaNuyenPer = Convert.ToInt32(objXmlDocument.SelectSingleNode("/settings/karmacost/karmanuyenper").InnerText);
 			_intKarmaContact = Convert.ToInt32(objXmlDocument.SelectSingleNode("/settings/karmacost/karmacontact").InnerText);
-			try
-			{
-				_intKarmaEnemy = Convert.ToInt32(objXmlDocument.SelectSingleNode("/settings/karmacost/karmaenemy").InnerText);
-			}
-			catch
-			{
-			}
 			_intKarmaCarryover = Convert.ToInt32(objXmlDocument.SelectSingleNode("/settings/karmacost/karmacarryover").InnerText);
 			_intKarmaSpirit = Convert.ToInt32(objXmlDocument.SelectSingleNode("/settings/karmacost/karmaspirit").InnerText);
 			_intKarmaManeuver = Convert.ToInt32(objXmlDocument.SelectSingleNode("/settings/karmacost/karmamaneuver").InnerText);
@@ -2201,7 +2173,6 @@ namespace Chummer
 				_intKarmaImproveComplexForm = Convert.ToInt32(Registry.CurrentUser.CreateSubKey("Software\\Chummer5").GetValue("karmaimprovecomplexform").ToString());
 				_intKarmaNuyenPer = Convert.ToInt32(Registry.CurrentUser.CreateSubKey("Software\\Chummer5").GetValue("karmanuyenper").ToString());
 				_intKarmaContact = Convert.ToInt32(Registry.CurrentUser.CreateSubKey("Software\\Chummer5").GetValue("karmacontact").ToString());
-                _intKarmaEnemy = Convert.ToInt32(Registry.CurrentUser.CreateSubKey("Software\\Chummer5").GetValue("karmaenemy").ToString());
 				_intKarmaCarryover = Convert.ToInt32(Registry.CurrentUser.CreateSubKey("Software\\Chummer5").GetValue("karmacarryover").ToString());
 				_intKarmaSpirit = Convert.ToInt32(Registry.CurrentUser.CreateSubKey("Software\\Chummer5").GetValue("karmaspirit").ToString());
 				_intKarmaManeuver = Convert.ToInt32(Registry.CurrentUser.CreateSubKey("Software\\Chummer5").GetValue("karmamaneuver").ToString());
@@ -2376,19 +2347,14 @@ namespace Chummer
 			if (_strBookXPath != "")
 				return _strBookXPath;
 
-			string strPath = "(";
+			string strPath = "";
 
 			foreach (string strBook in _lstBooks)
 			{
 				if (strBook != "")
 					strPath += "source = \"" + strBook + "\" or ";
 			}
-			strPath = strPath.Substring(0, strPath.Length - 4) + ")";
-
-			if (GlobalOptions.Instance.MissionsOnly)
-			{
-				strPath += " and not(nomission)";
-			}
+			strPath = strPath.Substring(0, strPath.Length - 4);
 
 			_strBookXPath = strPath;
 			
@@ -3073,7 +3039,7 @@ namespace Chummer
 		}
 
 		/// <summary>
-		/// Whether or not characters can have more than 25 BP in Positive Qualities.
+		/// Whether or not characters can have more than 35 BP in Positive Qualities.
 		/// </summary>
 		public bool ExceedPositiveQualities
 		{
@@ -3088,7 +3054,7 @@ namespace Chummer
 		}
 
 		/// <summary>
-		/// Whether or not characters can have more than 25 BP in Negative Qualities.
+		/// Whether or not characters can have more than 35 BP in Negative Qualities.
 		/// </summary>
 		public bool ExceedNegativeQualities
 		{
@@ -3103,7 +3069,8 @@ namespace Chummer
 		}
 
 		/// <summary>
-		/// If true, the character will not receive additional BP from Negative Qualities past the initial 25
+		/// Whether or not character can still only receive up to 35 BP from Negative Qualities. This means they can take as many Negative Qualities as they'd like but will never receive more than
+		/// 35 additional BP from selecting them.
 		/// </summary>
 		public bool ExceedNegativeQualitiesLimit
 		{
@@ -4050,21 +4017,6 @@ namespace Chummer
 				_intKarmaContact = value;
 			}
 		}
-
-        /// <summary>
-        /// Karma cost for an Enemy = (Connection + Loyalty) x this value.
-        /// </summary>
-        public int KarmaEnemy
-        {
-            get
-            {
-                return _intKarmaEnemy;
-            }
-            set
-            {
-                _intKarmaEnemy = value;
-            }
-        }
 
 		/// <summary>
 		/// Maximum amount of remaining Karma that is carried over to the character once they are created.

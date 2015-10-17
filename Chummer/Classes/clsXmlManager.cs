@@ -96,7 +96,8 @@ namespace Chummer
 		/// <param name="strFileName">Name of the XML file to load.</param>
 		public XmlDocument Load(string strFileName)
 		{
-			string strPath = Path.Combine(Environment.CurrentDirectory, "data", strFileName);
+			string strPath = Path.Combine(Environment.CurrentDirectory, "data");
+			strPath = Path.Combine(strPath, strFileName);
 			DateTime datDate = File.GetLastWriteTime(strPath);
 
 			// Look to see if this XmlDocument is already loaded.
@@ -380,11 +381,12 @@ namespace Chummer
 		public void Verify(string strLanguage, List<string> lstBooks)
 		{
 			XmlDocument objLanguageDoc = new XmlDocument();
-			string languageDirectoryPath = Path.Combine(Environment.CurrentDirectory, "lang");
-            string strFilePath = Path.Combine(languageDirectoryPath, strLanguage + "_data.xml");
+			string strFilePath = Path.Combine(Environment.CurrentDirectory, "lang");
+			strFilePath = Path.Combine(strFilePath, strLanguage + "_data.xml");
 			objLanguageDoc.Load(strFilePath);
 
-			string strLangPath = Path.Combine(languageDirectoryPath, "results_" + strLanguage + ".xml");
+			string strLangPath = Path.Combine(Environment.CurrentDirectory, "lang");
+			strLangPath = Path.Combine(strLangPath, "results_" + strLanguage + ".xml");
 			FileStream objStream = new FileStream(strLangPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
 			XmlTextWriter objWriter = new XmlTextWriter(objStream, Encoding.Unicode);
 			objWriter.Formatting = Formatting.Indented;
@@ -398,14 +400,15 @@ namespace Chummer
 			string strPath = Path.Combine(Environment.CurrentDirectory, "data");
 			foreach (string strFile in Directory.GetFiles(strPath, "*.xml"))
 			{
-				string strFileName = Path.GetFileName(strFile);
+				string strPathReplace = strPath + Path.DirectorySeparatorChar;
+				string strFileName = strFile.Replace(strPathReplace, string.Empty);
 
 				// Do not bother to check custom files.
 				if (!strFileName.StartsWith("custom") && !strFile.StartsWith("override") && !strFile.Contains("packs.xml") && !strFile.Contains("ranges.xml"))
 				{
 					// Load the current English file.
 					XmlDocument objEnglishDoc = new XmlDocument();
-					objEnglishDoc = Load(strFileName);
+					objEnglishDoc = Load(strFile.Replace(strPathReplace, string.Empty));
 					XmlNode objEnglishRoot = objEnglishDoc.SelectSingleNode("/chummer");
 
 					// First pass: make sure the document exists.

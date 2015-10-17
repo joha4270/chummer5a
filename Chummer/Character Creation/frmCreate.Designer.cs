@@ -766,7 +766,6 @@
 			this.cmdDeleteVehicle = new System.Windows.Forms.Button();
 			this.treVehicles = new System.Windows.Forms.TreeView();
 			this.tabCharacterInfo = new System.Windows.Forms.TabPage();
-			this.chkAutoBackstory = new System.Windows.Forms.CheckBox();
 			this.lblPublicAwareTotal = new System.Windows.Forms.Label();
 			this.lblNotorietyTotal = new System.Windows.Forms.Label();
 			this.lblStreetCredTotal = new System.Windows.Forms.Label();
@@ -877,6 +876,7 @@
 			this.tsMetamagicNotes = new System.Windows.Forms.ToolStripMenuItem();
 			this.cmsTechnique = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.tsAddTechniqueNotes = new System.Windows.Forms.ToolStripMenuItem();
+			this.chkAutoBackstory = new System.Windows.Forms.CheckBox();
 			this.cmdAddMartialArt = new SplitButton();
 			this.cmdAddSpell = new SplitButton();
 			this.cmdAddComplexForm = new SplitButton();
@@ -1318,7 +1318,7 @@
 			this.lblFoci.TabIndex = 92;
 			this.lblFoci.Tag = "Label_BondedFoci";
 			this.lblFoci.Text = "Bonded Foci";
-			this.tipTooltip.SetToolTip(this.lblFoci, "Each bonded Focus costs a number of karma depending on its type and force\r\n");
+			this.tipTooltip.SetToolTip(this.lblFoci, "Each bonded Focus costs a number of BP equal to its Force.");
 			// 
 			// chkVehicleWeaponAccessoryInstalled
 			// 
@@ -2420,7 +2420,7 @@
 			this.mnuFileSave.MergeIndex = 3;
 			this.mnuFileSave.Name = "mnuFileSave";
 			this.mnuFileSave.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
-			this.mnuFileSave.Size = new System.Drawing.Size(148, 22);
+			this.mnuFileSave.Size = new System.Drawing.Size(140, 22);
 			this.mnuFileSave.Tag = "Menu_FileSave";
 			this.mnuFileSave.Text = "&Save";
 			this.mnuFileSave.Click += new System.EventHandler(this.mnuFileSave_Click);
@@ -2430,7 +2430,7 @@
 			this.mnuFileSaveAs.MergeAction = System.Windows.Forms.MergeAction.Insert;
 			this.mnuFileSaveAs.MergeIndex = 4;
 			this.mnuFileSaveAs.Name = "mnuFileSaveAs";
-			this.mnuFileSaveAs.Size = new System.Drawing.Size(148, 22);
+			this.mnuFileSaveAs.Size = new System.Drawing.Size(140, 22);
 			this.mnuFileSaveAs.Tag = "Menu_FileSaveAs";
 			this.mnuFileSaveAs.Text = "Save &As";
 			this.mnuFileSaveAs.Click += new System.EventHandler(this.mnuFileSaveAs_Click);
@@ -2440,15 +2440,14 @@
 			this.toolStripSeparator1.MergeAction = System.Windows.Forms.MergeAction.Insert;
 			this.toolStripSeparator1.MergeIndex = 5;
 			this.toolStripSeparator1.Name = "toolStripSeparator1";
-			this.toolStripSeparator1.Size = new System.Drawing.Size(145, 6);
+			this.toolStripSeparator1.Size = new System.Drawing.Size(137, 6);
 			// 
 			// mnuFileClose
 			// 
 			this.mnuFileClose.MergeAction = System.Windows.Forms.MergeAction.Insert;
 			this.mnuFileClose.MergeIndex = 6;
 			this.mnuFileClose.Name = "mnuFileClose";
-			this.mnuFileClose.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.W)));
-			this.mnuFileClose.Size = new System.Drawing.Size(148, 22);
+			this.mnuFileClose.Size = new System.Drawing.Size(140, 22);
 			this.mnuFileClose.Tag = "Menu_FileClose";
 			this.mnuFileClose.Text = "&Close";
 			this.mnuFileClose.Click += new System.EventHandler(this.mnuFileClose_Click);
@@ -2457,7 +2456,7 @@
 			// 
 			this.toolStripSeparator2.MergeIndex = 7;
 			this.toolStripSeparator2.Name = "toolStripSeparator2";
-			this.toolStripSeparator2.Size = new System.Drawing.Size(145, 6);
+			this.toolStripSeparator2.Size = new System.Drawing.Size(137, 6);
 			// 
 			// mnuFilePrint
 			// 
@@ -2466,7 +2465,7 @@
 			this.mnuFilePrint.MergeIndex = 8;
 			this.mnuFilePrint.Name = "mnuFilePrint";
 			this.mnuFilePrint.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.P)));
-			this.mnuFilePrint.Size = new System.Drawing.Size(148, 22);
+			this.mnuFilePrint.Size = new System.Drawing.Size(140, 22);
 			this.mnuFilePrint.Tag = "Menu_FilePrint";
 			this.mnuFilePrint.Text = "&Print";
 			this.mnuFilePrint.Click += new System.EventHandler(this.mnuFilePrint_Click);
@@ -6488,7 +6487,7 @@
 			// 
 			// lblLifestyleQualities
 			// 
-			this.lblLifestyleQualities.Location = new System.Drawing.Point(468, 128);
+			this.lblLifestyleQualities.Location = new System.Drawing.Point(494, 151);
 			this.lblLifestyleQualities.Name = "lblLifestyleQualities";
 			this.lblLifestyleQualities.Size = new System.Drawing.Size(323, 290);
 			this.lblLifestyleQualities.TabIndex = 103;
@@ -6497,7 +6496,7 @@
 			// lblLifestyleQualitiesLabel
 			// 
 			this.lblLifestyleQualitiesLabel.AutoSize = true;
-			this.lblLifestyleQualitiesLabel.Location = new System.Drawing.Point(412, 128);
+			this.lblLifestyleQualitiesLabel.Location = new System.Drawing.Point(480, 128);
 			this.lblLifestyleQualitiesLabel.Name = "lblLifestyleQualitiesLabel";
 			this.lblLifestyleQualitiesLabel.Size = new System.Drawing.Size(50, 13);
 			this.lblLifestyleQualitiesLabel.TabIndex = 102;
@@ -6507,7 +6506,7 @@
 			// lblLifestyleComforts
 			// 
 			this.lblLifestyleComforts.AutoSize = true;
-			this.lblLifestyleComforts.Location = new System.Drawing.Point(361, 128);
+			this.lblLifestyleComforts.Location = new System.Drawing.Point(408, 128);
 			this.lblLifestyleComforts.Name = "lblLifestyleComforts";
 			this.lblLifestyleComforts.Size = new System.Drawing.Size(19, 13);
 			this.lblLifestyleComforts.TabIndex = 93;
@@ -6526,7 +6525,7 @@
 			// lblLifestyleStartingNuyenLabel
 			// 
 			this.lblLifestyleStartingNuyenLabel.AutoSize = true;
-			this.lblLifestyleStartingNuyenLabel.Location = new System.Drawing.Point(412, 95);
+			this.lblLifestyleStartingNuyenLabel.Location = new System.Drawing.Point(498, 36);
 			this.lblLifestyleStartingNuyenLabel.Name = "lblLifestyleStartingNuyenLabel";
 			this.lblLifestyleStartingNuyenLabel.Size = new System.Drawing.Size(80, 13);
 			this.lblLifestyleStartingNuyenLabel.TabIndex = 90;
@@ -6536,7 +6535,7 @@
 			// lblLifestyleStartingNuyen
 			// 
 			this.lblLifestyleStartingNuyen.AutoSize = true;
-			this.lblLifestyleStartingNuyen.Location = new System.Drawing.Point(498, 95);
+			this.lblLifestyleStartingNuyen.Location = new System.Drawing.Point(584, 36);
 			this.lblLifestyleStartingNuyen.Name = "lblLifestyleStartingNuyen";
 			this.lblLifestyleStartingNuyen.Size = new System.Drawing.Size(83, 13);
 			this.lblLifestyleStartingNuyen.TabIndex = 89;
@@ -9016,20 +9015,6 @@
 			this.tabCharacterInfo.Tag = "Tab_CharacterInfo";
 			this.tabCharacterInfo.Text = "Character Info";
 			// 
-			// chkAutoBackstory
-			// 
-			this.chkAutoBackstory.AutoSize = true;
-			this.chkAutoBackstory.Checked = true;
-			this.chkAutoBackstory.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.chkAutoBackstory.Location = new System.Drawing.Point(637, 178);
-			this.chkAutoBackstory.Margin = new System.Windows.Forms.Padding(0);
-			this.chkAutoBackstory.Name = "chkAutoBackstory";
-			this.chkAutoBackstory.Size = new System.Drawing.Size(133, 17);
-			this.chkAutoBackstory.TabIndex = 91;
-			this.chkAutoBackstory.Text = "Automatic background";
-			this.chkAutoBackstory.UseVisualStyleBackColor = true;
-			this.chkAutoBackstory.CheckedChanged += new System.EventHandler(this.chkAutoBackstory_CheckedChanged);
-			// 
 			// lblPublicAwareTotal
 			// 
 			this.lblPublicAwareTotal.AutoSize = true;
@@ -10144,6 +10129,20 @@
 			this.tsAddTechniqueNotes.Text = "&Notes";
 			this.tsAddTechniqueNotes.Click += new System.EventHandler(this.tsAddTechniqueNotes_Click);
 			// 
+			// chkAutoBackstory
+			// 
+			this.chkAutoBackstory.AutoSize = true;
+			this.chkAutoBackstory.Checked = true;
+			this.chkAutoBackstory.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.chkAutoBackstory.Location = new System.Drawing.Point(637, 178);
+			this.chkAutoBackstory.Margin = new System.Windows.Forms.Padding(0);
+			this.chkAutoBackstory.Name = "chkAutoBackstory";
+			this.chkAutoBackstory.Size = new System.Drawing.Size(133, 17);
+			this.chkAutoBackstory.TabIndex = 91;
+			this.chkAutoBackstory.Text = "Automatic background";
+			this.chkAutoBackstory.UseVisualStyleBackColor = true;
+			this.chkAutoBackstory.CheckedChanged += new System.EventHandler(this.chkAutoBackstory_CheckedChanged);
+			// 
 			// cmdAddMartialArt
 			// 
 			this.cmdAddMartialArt.AutoSize = true;
@@ -10814,6 +10813,7 @@
         private System.Windows.Forms.Label lblCritterPowerCategoryLabel;
         private System.Windows.Forms.Label lblCritterPowerName;
         private System.Windows.Forms.Label lblCritterPowerNameLabel;
+        private System.Windows.Forms.TreeView treCritterPowers;
         private System.Windows.Forms.Button cmdDeleteCritterPower;
         private System.Windows.Forms.Button cmdAddCritterPower;
         private System.Windows.Forms.ToolStripMenuItem tsWeaponName;
@@ -11265,7 +11265,6 @@
         private System.Windows.Forms.Label lblContactPoints_Label;
         private System.Windows.Forms.Button cmdLifeModule;
 		private System.Windows.Forms.CheckBox chkAutoBackstory;
-		private System.Windows.Forms.TreeView treCritterPowers;
 	}
 }
 

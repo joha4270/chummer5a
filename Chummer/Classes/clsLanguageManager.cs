@@ -130,7 +130,8 @@ namespace Chummer
 			{
 				_objDictionary.Clear();
 				XmlDocument objEnglishDocument = new XmlDocument();
-				string strFilePath = Path.Combine(Environment.CurrentDirectory, "lang", "en-us.xml");
+				string strFilePath = Path.Combine(Environment.CurrentDirectory, "lang");
+				strFilePath = Path.Combine(strFilePath, "en-us.xml");
 				objEnglishDocument.Load(strFilePath);
 				foreach (XmlNode objNode in objEnglishDocument.SelectNodes("/chummer/strings/string"))
 				{
@@ -163,7 +164,8 @@ namespace Chummer
 				{
 					_strLanguage = strLanguage;
 					XmlDocument objLanguageDocument = new XmlDocument();
-					strFilePath = Path.Combine(Environment.CurrentDirectory, "lang", strLanguage + ".xml");
+					strFilePath = Path.Combine(Environment.CurrentDirectory, "lang");
+					strFilePath = Path.Combine(strFilePath, strLanguage + ".xml");
 					objLanguageDocument.Load(strFilePath);
 					_objXmlDocument.Load(strFilePath);
 					foreach (XmlNode objNode in objLanguageDocument.SelectNodes("/chummer/strings/string"))
@@ -188,7 +190,8 @@ namespace Chummer
 				}
 
 				// Check to see if the data translation file for the selected language exists.
-				string strDataPath = Path.Combine(Environment.CurrentDirectory, "lang", strLanguage + "_data.xml");
+				string strDataPath = Path.Combine(Environment.CurrentDirectory, "lang");
+				strDataPath = Path.Combine(strDataPath, strLanguage + "_data.xml");
 				if (File.Exists(strDataPath))
 				{
 					try
@@ -504,7 +507,8 @@ namespace Chummer
 			// Load the English version.
 			List<LanguageString> lstEnglish = new List<LanguageString>();
 			XmlDocument objEnglishDocument = new XmlDocument();
-			string strFilePath = Path.Combine(Environment.CurrentDirectory, "lang", "en-us.xml");
+			string strFilePath = Path.Combine(Environment.CurrentDirectory, "lang");
+			strFilePath = Path.Combine(strFilePath, "en-us.xml");
 			objEnglishDocument.Load(strFilePath);
 			foreach (XmlNode objNode in objEnglishDocument.SelectNodes("/chummer/strings/string"))
 			{
@@ -517,7 +521,8 @@ namespace Chummer
 			// Load the selected language version.
 			List<LanguageString> lstLanguage = new List<LanguageString>();
 			XmlDocument objLanguageDocument = new XmlDocument();
-			string strLangPath = Path.Combine(Environment.CurrentDirectory, "lang", strLanguage + ".xml");
+			string strLangPath = Path.Combine(Environment.CurrentDirectory, "lang");
+			strLangPath = Path.Combine(strLangPath, strLanguage + ".xml");
 			objLanguageDocument.Load(strLangPath);
 			foreach (XmlNode objNode in objLanguageDocument.SelectNodes("/chummer/strings/string"))
 			{

@@ -21,13 +21,12 @@ namespace Chummer
 		private void frmExport_Load(object sender, EventArgs e)
 		{
 			// Populate the XSLT list with all of the XSL files found in the sheets directory.
-			string exportDirectoryPath = Path.Combine(Environment.CurrentDirectory, "export");
-			foreach (string strFile in Directory.GetFiles(exportDirectoryPath))
+			foreach (string strFile in Directory.GetFiles(Environment.CurrentDirectory + Path.DirectorySeparatorChar + "export"))
 			{
 				// Only show files that end in .xsl. Do not include files that end in .xslt since they are used as "hidden" reference sheets (hidden because they are partial templates that cannot be used on their own).
 				if (!strFile.EndsWith(".xslt") && strFile.EndsWith(".xsl"))
 				{
-					string strFileName = Path.GetFileNameWithoutExtension(strFile);
+					string strFileName = strFile.Replace(Environment.CurrentDirectory + Path.DirectorySeparatorChar + "export" + Path.DirectorySeparatorChar, string.Empty).Replace(".xsl", string.Empty);
 					cboXSLT.Items.Add(strFileName);
 				}
 			}
@@ -49,8 +48,7 @@ namespace Chummer
 			// Look for the file extension information.
 			string strLine = "";
 			string strExtension = "xml";
-			string exportSheetPath = Path.Combine(Environment.CurrentDirectory, "export", cboXSLT.Text + ".xsl");
-			StreamReader objFile = new StreamReader(exportSheetPath);
+			StreamReader objFile = new StreamReader(Environment.CurrentDirectory + Path.DirectorySeparatorChar + "export" + Path.DirectorySeparatorChar + cboXSLT.Text + ".xsl");
 			while ((strLine = objFile.ReadLine()) != null)
 			{
 				if (strLine.StartsWith("<!-- ext:"))
@@ -68,7 +66,7 @@ namespace Chummer
 				return;
 
 			XslCompiledTransform objXSLTransform = new XslCompiledTransform();
-			objXSLTransform.Load(exportSheetPath); // Use the path for the export sheet.
+			objXSLTransform.Load(Environment.CurrentDirectory + Path.DirectorySeparatorChar + "export" + Path.DirectorySeparatorChar + cboXSLT.Text + ".xsl"); // Use the path for the export sheet.
 
 			XmlWriterSettings objSettings = objXSLTransform.OutputSettings.Clone();
 			objSettings.CheckCharacters = false;
