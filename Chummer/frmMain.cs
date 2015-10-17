@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using System.Xml;
-
+using System.Reflection;
 namespace Chummer
 {
 	public partial class frmMain : Form
@@ -16,6 +16,8 @@ namespace Chummer
         public frmMain()
 		{
 			InitializeComponent();
+			Version version = Assembly.GetExecutingAssembly().GetName().Version;
+			this.Text = string.Format("Chummer 5a - Version {0}.{1}.{2}",version.Major, version.Minor, version.Build);
 			LanguageManager.Instance.Load(GlobalOptions.Instance.Language, this);
 
             /** Dashboard **/
@@ -88,6 +90,7 @@ namespace Chummer
 			// Attempt to cache the XML files that are used the most.
 			try
 			{
+				Timekeeper.Start("cache_load");
 				XmlManager.Instance.Load("armor.xml");
 				XmlManager.Instance.Load("bioware.xml");
 				XmlManager.Instance.Load("books.xml");
@@ -100,6 +103,7 @@ namespace Chummer
 				XmlManager.Instance.Load("skills.xml");
 				XmlManager.Instance.Load("vehicles.xml");
 				XmlManager.Instance.Load("weapons.xml");
+				Timekeeper.Finish("cache_load");
 			}
 			catch
 			{
@@ -149,7 +153,7 @@ namespace Chummer
 
 		private void mnuHelpDumpshock_Click(object sender, EventArgs e)
 		{
-			System.Diagnostics.Process.Start("http://forums.dumpshock.com/index.php?showtopic=36737");
+			System.Diagnostics.Process.Start("https://github.com/chummer5a/chummer5a/issues/");
 		}
 
 		private void mnuFilePrintMultiple_Click(object sender, EventArgs e)
@@ -167,8 +171,10 @@ namespace Chummer
 		private void mnuNewCritter_Click(object sender, EventArgs e)
 		{
 			Character objCharacter = new Character();
+			string settingsPath = Path.Combine(Environment.CurrentDirectory, "settings");
+			string[] settingsFiles = Directory.GetFiles(settingsPath, "*.xml");
 
-			if (Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, "settings"), "*.xml").Count() > 1)
+			if (settingsFiles.Length > 1)
 			{
 				frmSelectSetting frmPickSetting = new frmSelectSetting();
 				frmPickSetting.ShowDialog(this);
@@ -180,10 +186,8 @@ namespace Chummer
 			}
 			else
 			{
-				string strSettingsFile = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, "settings"), "*.xml")[0];
-				strSettingsFile = strSettingsFile.Replace(Path.Combine(Environment.CurrentDirectory, "settings"), string.Empty);
-				strSettingsFile = strSettingsFile.Replace(Path.DirectorySeparatorChar, ' ').Trim();
-				objCharacter.SettingsFile = strSettingsFile;
+				string strSettingsFile = settingsFiles[0];
+				objCharacter.SettingsFile = Path.GetFileName(strSettingsFile);
 			}
 
 			// Override the defaults for the setting.
@@ -489,9 +493,20 @@ namespace Chummer
         /// </summary>
         private void ShowNewForm(object sender, EventArgs e)
 		{
+			string strFilePath = Path.Combine(Environment.CurrentDirectory, "settings", "default.xml");
+			if (!File.Exists(strFilePath))
+			{
+				if (MessageBox.Show(LanguageManager.Instance.GetString("Message_CharacterOptions_OpenOptions"), LanguageManager.Instance.GetString("MessageTitle_CharacterOptions_OpenOptions"), MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+				{
+					frmOptions frmOptions = new frmOptions();
+					frmOptions.ShowDialog();
+				}
+			}
 			Character objCharacter = new Character();
+			string settingsPath = Path.Combine(Environment.CurrentDirectory, "settings");
+			string[] settingsFiles = Directory.GetFiles(settingsPath, "*.xml");
 
-			if (Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, "settings"), "*.xml").Count() > 1)
+			if (settingsFiles.Length > 1)
 			{
 				frmSelectSetting frmPickSetting = new frmSelectSetting();
 				frmPickSetting.ShowDialog(this);
@@ -503,12 +518,10 @@ namespace Chummer
 			}
 			else
 			{
-				string strSettingsFile = Directory.GetFiles(Path.Combine(Environment.CurrentDirectory, "settings"), "*.xml")[0];
-				strSettingsFile = strSettingsFile.Replace(Path.Combine(Environment.CurrentDirectory, "settings"), string.Empty);
-				strSettingsFile = strSettingsFile.Replace(Path.DirectorySeparatorChar, ' ').Trim();
-				objCharacter.SettingsFile = strSettingsFile;
+				string strSettingsFile = settingsFiles[0];
+				objCharacter.SettingsFile = Path.GetFileName(strSettingsFile);
 			}
-			
+
 			// Show the BP selection window.
 			frmSelectBP frmBP = new frmSelectBP(objCharacter);
 			frmBP.ShowDialog();
@@ -575,10 +588,16 @@ namespace Chummer
 
 			if (openFileDialog.ShowDialog(this) == DialogResult.OK)
 			{
+				Timekeeper.Start("load_sum");
 				foreach (string strFileName in openFileDialog.FileNames)
 				{
 					LoadCharacter(strFileName);
+					Timekeeper.Start("load_event_time");
+					Application.DoEvents();
+					Timekeeper.Finish("load_event_time");
 				}
+				Timekeeper.Finish("load_sum");
+				Timekeeper.Log();
 			}
 		}
 
@@ -593,11 +612,14 @@ namespace Chummer
 		{
 			if (File.Exists(strFileName) && strFileName.EndsWith("chum5"))
 			{
+				Timekeeper.Start("loading");
 				bool blnLoaded = false;
 				Character objCharacter = new Character();
 				objCharacter.FileName = strFileName;
+				Timekeeper.Start("load_file");
 				blnLoaded = objCharacter.Load();
-
+				Timekeeper.Finish("load_file");
+				Timekeeper.Start("load_free");
 				if (!blnLoaded)
 					return;
 

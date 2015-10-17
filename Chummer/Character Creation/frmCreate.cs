@@ -4,19 +4,19 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Xml.XPath;
 
 namespace Chummer
 {
-    public partial class frmCreate : Form
-    {
+	[System.ComponentModel.DesignerCategory("Form")]
+	public partial class frmCreate : CharacterShared
+	{
         // Set the default culture to en-US so we work with decimals correctly.
-        private Character _objCharacter;
-        private MainController _objController;
-        private CharacterOptions _objOptions;
-        private CommonFunctions _objFunctions;
+        
+        
         private bool _blnSkipRefresh = false;
         private bool _blnSkipUpdate = false;
         private bool _blnLoading = false;
@@ -56,7 +56,6 @@ namespace Chummer
             _objCharacter.UncouthChanged += objCharacter_UncouthChanged;
             _objCharacter.FriendsInHighPlacesChanged += objCharacter_FriendsInHighPlacesChanged;
             _objCharacter.SchoolOfHardKnocksChanged += objCharacter_SchoolOfHardKnocksChanged;
-            _objCharacter.InfirmChanged += objCharacter_InfirmChanged;
             _objCharacter.ExConChanged += objCharacter_ExConChanged;
             _objCharacter.TrustFundChanged += objCharacter_TrustFundChanged;
             _objCharacter.TechSchoolChanged += objCharacter_TechSchoolChanged;
@@ -109,6 +108,8 @@ namespace Chummer
 
         private void frmCreate_Load(object sender, EventArgs e)
         {
+	        Timekeeper.Finish("load_free");
+			Timekeeper.Start("load_frm_create");
             _blnLoading = true;
             if (!_objCharacter.IsCritter && (_objCharacter.BuildMethod == CharacterBuildMethod.Karma && _objCharacter.BuildKarma == 0) || (_objCharacter.BuildMethod == CharacterBuildMethod.Priority && _objCharacter.BuildKarma == 0))
             {
@@ -160,27 +161,20 @@ namespace Chummer
             foreach (Contact contact in _objCharacter.Contacts)
                 count += contact.ContactPoints;
 
-            if ((_objCharacter.ContactPoints - count) >= 0)
-            {
-                lblPBuildContacts.Text = String.Format("{0} " + LanguageManager.Instance.GetString("String_Of") + " {1}", (_objCharacter.ContactPoints - count).ToString(), _objCharacter.ContactPoints.ToString());
-            }
-            else
-            {
-                int karmaSpent = _objCharacter.ContactPoints - count;
-                karmaSpent = karmaSpent *= -1;
-                lblPBuildContacts.Text = String.Format(LanguageManager.Instance.GetString("String_OverContactPoints"), (_objCharacter.ContactPoints - count).ToString(), _objCharacter.ContactPoints.ToString(), karmaSpent.ToString());
-            }
+            
 
             // Set the movement speed defaults
             lblMovement.Text = _objCharacter.Movement;
 
-            // Set the Statusbar Labels if we're using Karma to build.
-            if (_objCharacter.BuildMethod == CharacterBuildMethod.Karma || _objCharacter.BuildMethod == CharacterBuildMethod.LifeModule)
+			tssBPLabel.Text = LanguageManager.Instance.GetString("Label_Karma");
+			tssBPRemainLabel.Text = LanguageManager.Instance.GetString("Label_KarmaRemaining");
+			tabBPSummary.Text = LanguageManager.Instance.GetString("Tab_BPSummary_Karma");
+			lblQualityBPLabel.Text = LanguageManager.Instance.GetString("Label_Karma");
+
+			// Set the Statusbar Labels if we're using Karma to build.
+			if (_objCharacter.BuildMethod == CharacterBuildMethod.Karma || _objCharacter.BuildMethod == CharacterBuildMethod.LifeModule)
             {
-                tssBPLabel.Text = LanguageManager.Instance.GetString("Label_Karma");
-                tssBPRemainLabel.Text = LanguageManager.Instance.GetString("Label_KarmaRemaining");
-                tabBPSummary.Text = LanguageManager.Instance.GetString("Tab_BPSummary_Karma");
-                lblQualityBPLabel.Text = LanguageManager.Instance.GetString("Label_Karma");
+                
                 //TODO: Fix the UI for karmagen
 
                 nudAGI.Enabled = false;
@@ -383,7 +377,9 @@ namespace Chummer
                 {
                     if (objQuality.OriginSource == QualitySource.Metatype || objQuality.OriginSource == QualitySource.MetatypeRemovable)
                         objNode.ForeColor = SystemColors.GrayText;
-                }
+					if (!objQuality.Implemented)
+						objNode.ForeColor = Color.Red;
+				}
                 objNode.ToolTipText = objQuality.Notes;
 
                 if (objQuality.Type == QualityType.Positive)
@@ -585,20 +581,23 @@ namespace Chummer
                 if (_objCharacter.BuildMethod == CharacterBuildMethod.SumtoTen || _objCharacter.BuildMethod == CharacterBuildMethod.Priority)
                 {
                     nudNuyen.Maximum = 10;
-                    nudNuyen.Value = _objCharacter.NuyenBP;
+                    
                 }
-                else if (_objCharacter.BuildMethod == CharacterBuildMethod.Karma)
+                else if (_objCharacter.BuildMethod == CharacterBuildMethod.Karma || _objCharacter.BuildMethod == CharacterBuildMethod.LifeModule)
                 {
                     nudNuyen.Maximum = 200;
-                    nudNuyen.Value = _objCharacter.NuyenBP;
+                   
                 }
             }
             else
             {
                 //nudNuyen.Maximum = decimal.MaxValue;
             }
-            // Load the Skills information.
-            objXmlDocument = XmlManager.Instance.Load("skills.xml");
+	        if (_objCharacter.BornRich) nudNuyen.Maximum += 30;
+			nudNuyen.Value = _objCharacter.NuyenBP;
+
+			// Load the Skills information.
+			objXmlDocument = XmlManager.Instance.Load("skills.xml");
 
             // Populate the Skills Controls.
             XmlNodeList objXmlNodeList = objXmlDocument.SelectNodes("/chummer/skills/skill[" + _objCharacter.Options.BookXPath() + "]");
@@ -739,19 +738,14 @@ namespace Chummer
                     }
                 }
 
-                if (_objCharacter.Uneducated)
+                /*if (_objCharacter.Uneducated)
                 {
                     objGroupControl.IsEnabled = !objGroup.HasTechnicalSkills;
-                }
+                }*/
 
                 if (_objCharacter.Uncouth)
                 {
                     objGroupControl.IsEnabled = !objGroup.HasSocialSkills;
-                }
-
-                if (_objCharacter.Infirm)
-                {
-                    objGroupControl.IsEnabled = !objGroup.HasPhysicalSkills;
                 }
 
                 panSkillGroups.Controls.Add(objGroupControl);
@@ -808,6 +802,7 @@ namespace Chummer
                     objContactControl.LoyaltyRatingChanged += objContact_LoyaltyRatingChanged;
                     objContactControl.DeleteContact += objContact_DeleteContact;
                     objContactControl.FileNameChanged += objContact_FileNameChanged;
+                    objContactControl.FreeRatingChanged += objContact_OtherCostChanged;
                     objContactControl.ContactObject = objContact;
                     objContactControl.ContactName = objContact.Name;
                     objContactControl.ContactLocation = objContact.Location;
@@ -829,6 +824,8 @@ namespace Chummer
                     // Attach an EventHandler for the ConnectioNRatingChanged, LoyaltyRatingChanged, DeleteContact, and FileNameChanged Events.
                     objContactControl.ConnectionRatingChanged += objEnemy_ConnectionRatingChanged;
                     objContactControl.LoyaltyRatingChanged += objEnemy_LoyaltyRatingChanged;
+                    objContactControl.GroupStatusChanged += objEnemy_GroupStatusChanged;
+                    objContactControl.FreeRatingChanged += objEnemy_FreeStatusChanged;
                     objContactControl.DeleteContact += objEnemy_DeleteContact;
                     objContactControl.FileNameChanged += objEnemy_FileNameChanged;
 
@@ -1146,7 +1143,7 @@ namespace Chummer
                     objLifestyleNode.ForeColor = Color.SaddleBrown;
                 objLifestyleNode.ToolTipText = objLifestyle.Notes;
                 treLifestyles.Nodes[0].Nodes.Add(objLifestyleNode);
-            }
+			}
             treLifestyles.Nodes[0].Expand();
 
             PopulateGearList();
@@ -1466,6 +1463,9 @@ namespace Chummer
 
             // Stupid hack to get the MDI icon to show up properly.
             this.Icon = this.Icon.Clone() as System.Drawing.Icon;
+	        Timekeeper.Finish("load_frm_create");
+	        Timekeeper.Finish("loading");
+	        
         }
 
         private void frmCreate_FormClosing(object sender, FormClosingEventArgs e)
@@ -1508,7 +1508,6 @@ namespace Chummer
                 _objCharacter.UncouthChanged -= objCharacter_UncouthChanged;
                 _objCharacter.FriendsInHighPlacesChanged -= objCharacter_FriendsInHighPlacesChanged;
                 _objCharacter.SchoolOfHardKnocksChanged -= objCharacter_SchoolOfHardKnocksChanged;
-                _objCharacter.InfirmChanged -= objCharacter_InfirmChanged;
                 GlobalOptions.Instance.MRUChanged -= PopulateMRU;
 
                 treGear.ItemDrag -= treGear_ItemDrag;
@@ -1560,6 +1559,8 @@ namespace Chummer
                     objContactControl.LoyaltyRatingChanged -= objContact_LoyaltyRatingChanged;
                     objContactControl.DeleteContact -= objContact_DeleteContact;
                     objContactControl.FileNameChanged -= objContact_FileNameChanged;
+                    objContactControl.FreeRatingChanged -= objContact_OtherCostChanged;
+                    
                 }
 
                 foreach (ContactControl objContactControl in panEnemies.Controls.OfType<ContactControl>())
@@ -1568,6 +1569,8 @@ namespace Chummer
                     objContactControl.LoyaltyRatingChanged -= objEnemy_LoyaltyRatingChanged;
                     objContactControl.DeleteContact -= objEnemy_DeleteContact;
                     objContactControl.FileNameChanged -= objEnemy_FileNameChanged;
+                    objContactControl.GroupStatusChanged -= objEnemy_GroupStatusChanged;
+                    objContactControl.FreeRatingChanged -= objEnemy_FreeStatusChanged;
                 }
 
                 foreach (PetControl objContactControl in panPets.Controls.OfType<PetControl>())
@@ -2022,7 +2025,7 @@ namespace Chummer
                 return;
 
             // Change to the status of Uneducated being enabled.
-            if (_objCharacter.Uneducated)
+            /*if (_objCharacter.Uneducated)
             {
                 // If Uneducated is being added, run through all of the Technical Active Skills and disable them.
                 // Do not break SkillGroups as these will be used if this is ever removed.
@@ -2046,7 +2049,7 @@ namespace Chummer
                         objSkillGroupControl.IsEnabled = true;
                     }
                 }
-            }
+            }*/
         }
 
         private void objCharacter_UncouthChanged(object sender)
@@ -2129,24 +2132,20 @@ namespace Chummer
         {
             if (_blnReapplyImprovements)
                 return;
-
-            
-            if (_objCharacter.TrustFund)
+			
+            if (_objCharacter.TrustFund> 0)
             {
-
+				
             }
             else
             {
-
-            }
+			}
         }
 
         private void objCharacter_TechSchoolChanged(object sender)
         {
             if (_blnReapplyImprovements)
                 return;
-
-            
             if (_objCharacter.TechSchool)
             {
 
@@ -2261,12 +2260,14 @@ namespace Chummer
             
             if (_objCharacter.BornRich)
             {
-
+				nudNuyen.Maximum += 30;
             }
             else
             {
+				nudNuyen.Maximum -= 30;
+			}
 
-            }
+	        
         }
 
         private void objCharacter_ErasedChanged(object sender)
@@ -2282,38 +2283,6 @@ namespace Chummer
             else
             {
 
-            }
-        }
-        private void objCharacter_InfirmChanged(object sender)
-        {
-            if (_blnReapplyImprovements)
-                return;
-
-            // Change to the status of Infirm being enabled.
-            if (_objCharacter.Infirm)
-            {
-                // If Infirm is being added, run through all of the Physical Active Skills and disable them.
-                // Do not break SkillGroups as these will be used if this is ever removed.
-                foreach (SkillGroupControl objSkillGroupControl in panSkillGroups.Controls)
-                {
-                    if (objSkillGroupControl.HasPhysicalSkills)
-                    {
-                        objSkillGroupControl.GroupRating = 0;
-                        objSkillGroupControl.IsEnabled = false;
-                    }
-                }
-            }
-            else
-            {
-                // If Infirm is being removed, run through all of the Physical Active Skills and re-enable them.
-                // If they were a part of a SkillGroup, set their Rating back.
-                foreach (SkillGroupControl objSkillGroupControl in panSkillGroups.Controls)
-                {
-                    if (objSkillGroupControl.HasPhysicalSkills)
-                    {
-                        objSkillGroupControl.IsEnabled = true;
-                    }
-                }
             }
         }
         #endregion
@@ -2594,7 +2563,6 @@ namespace Chummer
             bool blnUncouth = _objCharacter.Uncouth;
             bool blnFriendsInHighPlaces = _objCharacter.FriendsInHighPlaces;
             bool blnSchoolOfHardKnocks = _objCharacter.SchoolOfHardKnocks;
-            bool blnInfirm = _objCharacter.Infirm;
 
             _blnReapplyImprovements = true;
 
@@ -3077,8 +3045,6 @@ namespace Chummer
                 objCharacter_FriendsInHighPlacesChanged(this);
             if (blnSchoolOfHardKnocks != _objCharacter.SchoolOfHardKnocks)
                 objCharacter_SchoolOfHardKnocksChanged(this);
-            if (blnInfirm != _objCharacter.Infirm)
-                objCharacter_InfirmChanged(this);
 
             _blnIsDirty = true;
             UpdateWindowTitle();
@@ -4785,9 +4751,14 @@ namespace Chummer
             UpdateWindowTitle();
         }
 
-        private void objContact_DeleteContact(Object sender)
+	    private void objContact_DeleteContact(Object sender)
+	    {
+		    objContact_DeleteContact(sender, false);
+	    }
+
+        private void objContact_DeleteContact(Object sender, bool force)
         {
-            if (!_objFunctions.ConfirmDelete(LanguageManager.Instance.GetString("Message_DeleteContact")))
+            if (!force && !_objFunctions.ConfirmDelete(LanguageManager.Instance.GetString("Message_DeleteContact")))
                 return;
 
             // Handle the DeleteContact Event for the ContactControl object.
@@ -4799,12 +4770,13 @@ namespace Chummer
 				if (objContactControl == objSender)
 				{
 					blnFound = true;
+					_objCharacter.Contacts.Remove(objContactControl.ContactObject);
 				}
 
                 // Once the Contact has been found, all of the other ContactControls on the Panel should move up 25 pixels to fill in the gap that deleting this one will cause.
                 if (blnFound)
                 {
-                    _objCharacter.Contacts.Remove(objContactControl.ContactObject);
+                    
                     objContactControl.Top -= 25;
 				}
 			}
@@ -4829,6 +4801,26 @@ namespace Chummer
         #region EnemyControl Events
         private void objEnemy_ConnectionRatingChanged(Object sender)
         {
+            objEnemy_Changed(sender);
+        }
+
+        private void objEnemy_LoyaltyRatingChanged(Object sender)
+        {
+            objEnemy_Changed(sender);
+        }
+
+        private void objEnemy_GroupStatusChanged(Object sender)
+        {
+            objEnemy_Changed(sender);
+        }
+
+        private void objEnemy_FreeStatusChanged(Object sender)
+        {
+            objEnemy_Changed(sender);
+        }
+        
+        private void objEnemy_Changed(Object sender)
+        {
             // Handle the ConnectionRatingChanged Event for the ContactControl object.
             int intNegativeQualityBP = 0;
             // Calculate the BP used for Negative Qualities.
@@ -4840,24 +4832,26 @@ namespace Chummer
             // Include the amount of free Negative Qualities from Improvements.
             intNegativeQualityBP -= _objImprovementManager.ValueOf(Improvement.ImprovementType.FreeNegativeQualities);
 
-            // Adjust for Karma build method.
-            if (_objCharacter.BuildMethod == CharacterBuildMethod.Karma)
-                intNegativeQualityBP *= _objOptions.KarmaQuality;
+            // Adjust for Karma cost multiplier.
+            intNegativeQualityBP *= _objOptions.KarmaQuality;
 
+            // Find current enemy BP total
             int intBPUsed = 0;
             foreach (ContactControl objContactControl in panEnemies.Controls)
             {
-                intBPUsed -= (objContactControl.ConnectionRating + objContactControl.LoyaltyRating) * _objOptions.KarmaQuality;
+                if (!objContactControl.Free) {
+                    intBPUsed -= (objContactControl.ConnectionRating + objContactControl.LoyaltyRating) * _objOptions.KarmaEnemy;
+                }
             }
 
             int intEnemyMax = 0;
             int intQualityMax = 0;
             string strQualityPoints = "";
             string strEnemyPoints = "";
-            intEnemyMax = 50;
-            intQualityMax = 70;
-            strEnemyPoints = "50 " + LanguageManager.Instance.GetString("String_Karma");
-            strQualityPoints = "70 " + LanguageManager.Instance.GetString("String_Karma");
+            intEnemyMax = _objCharacter.MaxKarma;
+            intQualityMax = _objCharacter.MaxKarma;
+            strEnemyPoints = intEnemyMax.ToString() + " " + LanguageManager.Instance.GetString("String_Karma");
+            strQualityPoints = intQualityMax.ToString() + " " + LanguageManager.Instance.GetString("String_Karma");
 
             if (intBPUsed < (intEnemyMax * -1) && !_objCharacter.IgnoreRules)
             {
@@ -4874,118 +4868,6 @@ namespace Chummer
                     MessageBox.Show(LanguageManager.Instance.GetString("Message_NegativeQualityLimit").Replace("{0}", strQualityPoints), LanguageManager.Instance.GetString("MessageTitle_NegativeQualityLimit"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                     ContactControl objSender = (ContactControl)sender;
                     objSender.ConnectionRating -= (((intQualityMax * -1) - (intBPUsed + intNegativeQualityBP)) / _objOptions.KarmaQuality);
-                }
-            }
-
-            UpdateCharacterInfo();
-
-            _blnIsDirty = true;
-            UpdateWindowTitle();
-        }
-
-        private void ObjEnemyGroupStatusChanged(Object sender)
-        {
-            // Handle the ConnectionRatingChanged Event for the ContactControl object.
-            int intNegativeQualityBP = 0;
-            // Calculate the BP used for Negative Qualities.
-            foreach (Quality objQuality in _objCharacter.Qualities)
-            {
-                if (objQuality.Type == QualityType.Negative && objQuality.ContributeToLimit)
-                    intNegativeQualityBP += objQuality.BP;
-            }
-            // Include the amount of free Negative Qualities from Improvements.
-            intNegativeQualityBP -= _objImprovementManager.ValueOf(Improvement.ImprovementType.FreeNegativeQualities);
-
-            // Adjust for Karma build method.
-            if (_objCharacter.BuildMethod == CharacterBuildMethod.Karma)
-                intNegativeQualityBP *= _objOptions.KarmaQuality;
-
-            int intBPUsed = 0;
-            foreach (ContactControl objContactControl in panEnemies.Controls)
-            {
-                intBPUsed -= (objContactControl.ConnectionRating + objContactControl.LoyaltyRating) * _objOptions.KarmaQuality;
-            }
-
-            int intEnemyMax = 0;
-            int intQualityMax = 0;
-            string strEnemyPoints = "";
-            string strQualityPoints = "";
-            intEnemyMax = 50;
-            intQualityMax = 70;
-            strEnemyPoints = "50 " + LanguageManager.Instance.GetString("String_Karma");
-            strQualityPoints = "70 " + LanguageManager.Instance.GetString("String_Karma");
-
-            if (intBPUsed < (intEnemyMax * -1) && !_objCharacter.IgnoreRules)
-            {
-                MessageBox.Show(LanguageManager.Instance.GetString("Message_EnemyLimit").Replace("{0}", strEnemyPoints), LanguageManager.Instance.GetString("MessageTitle_EnemyLimit"), MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ContactControl objSender = (ContactControl)sender;
-                
-                return;
-            }
-
-            if (!_objOptions.ExceedNegativeQualities)
-            {
-                if (intBPUsed + intNegativeQualityBP < (intQualityMax * -1) && !_objCharacter.IgnoreRules)
-                {
-                    MessageBox.Show(LanguageManager.Instance.GetString("Message_NegativeQualityLimit").Replace("{0}", strQualityPoints), LanguageManager.Instance.GetString("MessageTitle_NegativeQualityLimit"), MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    ContactControl objSender = (ContactControl)sender;
-                    return;
-                }
-            }
-
-            UpdateCharacterInfo();
-
-            _blnIsDirty = true;
-            UpdateWindowTitle();
-        }
-
-        private void objEnemy_LoyaltyRatingChanged(Object sender)
-        {
-            // Handle the LoyaltyRatingChanged Event for the ContactControl object.
-            int intNegativeQualityBP = 0;
-            // Calculate the BP used for Negative Qualities.
-            foreach (Quality objQuality in _objCharacter.Qualities)
-            {
-                if (objQuality.Type == QualityType.Negative && objQuality.ContributeToLimit)
-                    intNegativeQualityBP += objQuality.BP;
-            }
-            // Include the amount of free Negative Qualities from Improvements.
-            intNegativeQualityBP -= _objImprovementManager.ValueOf(Improvement.ImprovementType.FreeNegativeQualities);
-
-            // Adjust for Karma build method.
-            if (_objCharacter.BuildMethod == CharacterBuildMethod.Karma)
-                intNegativeQualityBP *= _objOptions.KarmaQuality;
-
-            int intBPUsed = 0;
-            foreach (ContactControl objContactControl in panEnemies.Controls)
-            {
-                intBPUsed -= (objContactControl.ConnectionRating + objContactControl.LoyaltyRating) * _objOptions.KarmaQuality;
-            }
-
-            int intEnemyMax = 0;
-            int intQualityMax = 0;
-            string strEnemyPoints = "";
-            string strQualityPoints = "";
-            intEnemyMax = 50;
-            intQualityMax = 70;
-            strEnemyPoints = "50 " + LanguageManager.Instance.GetString("String_Karma");
-            strQualityPoints = "70 " + LanguageManager.Instance.GetString("String_Karma");
-
-            if (intBPUsed < (intEnemyMax * -1) && !_objCharacter.IgnoreRules)
-            {
-                MessageBox.Show(LanguageManager.Instance.GetString("Message_EnemyLimit").Replace("{0}", strEnemyPoints), LanguageManager.Instance.GetString("MessageTitle_EnemyLimit"), MessageBoxButtons.OK, MessageBoxIcon.Information);
-                ContactControl objSender = (ContactControl)sender;
-                objSender.LoyaltyRating -= (intEnemyMax * -1) - intBPUsed;
-                return;
-            }
-
-            if (!_objOptions.ExceedNegativeQualities)
-            {
-                if (intBPUsed + intNegativeQualityBP < (intQualityMax * -1) && !_objCharacter.IgnoreRules)
-                {
-                    MessageBox.Show(LanguageManager.Instance.GetString("Message_NegativeQualityLimit").Replace("{0}", strQualityPoints), LanguageManager.Instance.GetString("MessageTitle_NegativeQualityLimit"), MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    ContactControl objSender = (ContactControl)sender;
-                    objSender.LoyaltyRating -= (((intQualityMax * -1) - (intBPUsed + intNegativeQualityBP)) / _objOptions.KarmaQuality);
                 }
             }
 
@@ -5445,6 +5327,7 @@ namespace Chummer
             objContactControl.LoyaltyRatingChanged += objContact_LoyaltyRatingChanged;
             objContactControl.DeleteContact += objContact_DeleteContact;
             objContactControl.FileNameChanged += objContact_FileNameChanged;
+            objContactControl.FreeRatingChanged += objContact_OtherCostChanged;
 
             panContacts.Controls.Add(objContactControl);
             UpdateCharacterInfo();
@@ -5483,7 +5366,7 @@ namespace Chummer
 
             foreach (ContactControl objEnemyControl in panEnemies.Controls)
             {
-                intBPUsed -= (objEnemyControl.ConnectionRating + objEnemyControl.LoyaltyRating) * _objOptions.KarmaQuality;
+                intBPUsed -= (objEnemyControl.ConnectionRating + objEnemyControl.LoyaltyRating) * _objOptions.KarmaEnemy;
             }
 
             if (intBPUsed < (intEnemyMax * -1) && !_objCharacter.IgnoreRules)
@@ -5510,11 +5393,12 @@ namespace Chummer
             objContactControl.EntityType = ContactType.Enemy;
 
             // Attach an EventHandler for the ConnectioNRatingChanged, LoyaltyRatingChanged, DeleteContact, FileNameChanged and OtherCostChanged(hackish) Events
-            //TODO: Refactor the clusterfuck that is enemy cost calculations
             objContactControl.ConnectionRatingChanged += objEnemy_ConnectionRatingChanged;
             objContactControl.LoyaltyRatingChanged += objEnemy_LoyaltyRatingChanged;
             objContactControl.DeleteContact += objEnemy_DeleteContact;
             objContactControl.FileNameChanged += objEnemy_FileNameChanged;
+            objContactControl.GroupStatusChanged += objEnemy_GroupStatusChanged;
+            objContactControl.FreeRatingChanged += objEnemy_FreeStatusChanged;
             objContactControl.IsEnemy = true;
 
             // Set the ContactControl's Location since scrolling the Panel causes it to actually change the child Controls' Locations.
@@ -5529,43 +5413,6 @@ namespace Chummer
 
         private void cmdAddSpell_Click(object sender, EventArgs e)
         {
-            // Count the number of Spells the character currently has and make sure they do not try to select more Spells than they are allowed.
-            // The maximum number of Spells a character can start with is 2 x (highest of Spellcasting or Ritual Spellcasting Skill).
-            int intSpellCount = 0;
-            foreach (TreeNode nodCategory in treSpells.Nodes)
-            {
-                foreach (TreeNode nodSpell in nodCategory.Nodes)
-                {
-                    intSpellCount++;
-                }
-            }
-
-            // Run through the list of Active Skills and pick out the two applicable ones.
-            int intSkillValue = 0;
-            foreach (SkillControl objSkillControl in panActiveSkills.Controls)
-            {
-                if ((objSkillControl.SkillName == "Spellcasting" || objSkillControl.SkillName == "Ritual Spellcasting") && objSkillControl.SkillRating > intSkillValue)
-                    intSkillValue = objSkillControl.SkillRating + objSkillControl.SkillObject.RatingModifiers;
-            }
-
-            // Check against the maximum allowable number of spells
-            if (_objCharacter.BuildMethod == CharacterBuildMethod.Priority || _objCharacter.BuildMethod == CharacterBuildMethod.SumtoTen)
-            {
-                if (intSpellCount >= ((_objCharacter.MAG.TotalValue * 2) + _objImprovementManager.ValueOf(Improvement.ImprovementType.SpellLimit)) && !_objCharacter.IgnoreRules)
-                {
-                    MessageBox.Show(LanguageManager.Instance.GetString("Message_PrioritySpellLimit"), LanguageManager.Instance.GetString("MessageTitle_SpellLimit"), MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-            }
-            else
-            {
-                if (intSpellCount >= ((2 * intSkillValue) + _objImprovementManager.ValueOf(Improvement.ImprovementType.SpellLimit)) && !_objCharacter.IgnoreRules)
-                {
-                    MessageBox.Show(LanguageManager.Instance.GetString("Message_SpellLimit"), LanguageManager.Instance.GetString("MessageTitle_SpellLimit"), MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    return;
-                }
-            }
-
             frmSelectSpell frmPickSpell = new frmSelectSpell(_objCharacter);
             frmPickSpell.ShowDialog(this);
             // Make sure the dialogue window was not canceled.
@@ -5625,7 +5472,7 @@ namespace Chummer
             _blnIsDirty = true;
             UpdateWindowTitle();
 
-            intSpellCount = 0;
+            int intSpellCount = 0;
             foreach (TreeNode nodCategory in treSpells.Nodes)
             {
                 foreach (TreeNode nodSpell in nodCategory.Nodes)
@@ -5726,8 +5573,8 @@ namespace Chummer
         {
             int i = panSprites.Controls.Count;
 
-            // The number of registered Sprites cannot exceed the character's CHA.
-            if (i >= _objCharacter.CHA.Value && !_objCharacter.IgnoreRules)
+            // The number of registered Sprites cannot exceed the character's LOG.
+            if (i >= _objCharacter.LOG.Value && !_objCharacter.IgnoreRules)
             {
                 MessageBox.Show(LanguageManager.Instance.GetString("Message_RegisteredSpriteLimit"), LanguageManager.Instance.GetString("MessageTitle_RegisteredSpriteLimit"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
@@ -7780,7 +7627,7 @@ namespace Chummer
             XmlNodeList xnodes = xdoc.SelectNodes("chummer/stages/stage");
             //from 1 to second highest life module order possible (ye hardcoding is bad, but extra stage is a niche case)
             int i;
-            for (i = 1; i < 3; i++)
+            for (i = 1; i < 5; i++)
             {
                 XmlNode node = xdoc.SelectSingleNode("chummer/stages/stage[@order = \"" + i + "\"]");
 	            if (node == null)
@@ -7942,7 +7789,7 @@ namespace Chummer
 
                 // Include the BP used by Enemies.
                 if (lblEnemiesBP.Text.Contains(LanguageManager.Instance.GetString("String_BP")))
-                    intBP += int.Parse(lblEnemiesBP.Text.Replace(LanguageManager.Instance.GetString("String_BP"), ""));
+                    intBP += int.Parse(lblEnemiesBP.Text.Replace(LanguageManager.Instance.GetString("String_Karma"), ""));
                 else
                     intBP += int.Parse(lblEnemiesBP.Text.Replace(" " + LanguageManager.Instance.GetString("String_Karma"), ""));
 
@@ -8034,7 +7881,7 @@ namespace Chummer
                             _objCharacter.Qualities.Add(objSubQuality);
                             }
                         }
-                            }
+                }
 
                 // Add any Critter Powers that are gained through the Quality (Infected).
                 if (objXmlQuality.SelectNodes("powers/power").Count > 0)
@@ -8296,7 +8143,16 @@ namespace Chummer
                     _objCharacter.RESEnabled = false;
                     _objCharacter.TechnomancerEnabled = false;
                     break;
-                default:
+				case "Changeling (Class I SURGE)":
+					_objCharacter.MetageneticLimit = 0;
+					break;
+				case "Changeling (Class II SURGE)":
+					_objCharacter.MetageneticLimit = 0;
+					break;
+				case "Changeling (Class III SURGE)":
+					_objCharacter.MetageneticLimit = 0;
+					break;
+				default:
                     break;
             }
 
@@ -8928,17 +8784,26 @@ namespace Chummer
                 MessageBox.Show(LanguageManager.Instance.GetString("Message_CannotModifyWeapon"), LanguageManager.Instance.GetString("MessageTitle_CannotModifyWeapon"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            else
-            {
-                XmlNodeList objXmlMountList = objXmlWeapon.SelectNodes("accessorymounts/mount");
-                string strMounts = "";
-                foreach (XmlNode objXmlMount in objXmlMountList)
-                    strMounts += objXmlMount.InnerText + "/";
+			else
+			{
+				XmlNodeList objXmlMountList = objXmlWeapon.SelectNodes("accessorymounts/mount");
+				string strMounts = "";
+				foreach (XmlNode objXmlMount in objXmlMountList)
+				{
+					// Run through the Weapon's currenct Accessories and filter out any used up Mount points.
+					bool blnFound = false;
+					foreach (WeaponAccessory objCurrentAccessory in objWeapon.WeaponAccessories)
+					{
+						if (objCurrentAccessory.Mount == objXmlMount.InnerText)
+							blnFound = true;
+					}
+					if (!blnFound)
+						strMounts += objXmlMount.InnerText + "/";
+				}
+				frmPickWeaponAccessory.AllowedMounts = strMounts;
+			}
 
-                frmPickWeaponAccessory.AllowedMounts = strMounts;
-            }
-
-            frmPickWeaponAccessory.WeaponCost = objWeapon.Cost;
+			frmPickWeaponAccessory.WeaponCost = objWeapon.Cost;
             frmPickWeaponAccessory.AccessoryMultiplier = objWeapon.AccessoryMultiplier;
             frmPickWeaponAccessory.ShowDialog();
 
@@ -10585,8 +10450,10 @@ namespace Chummer
                     {
                         if (objQuality.OriginSource == QualitySource.Metatype || objQuality.OriginSource == QualitySource.MetatypeRemovable)
                             treQualities.SelectedNode.ForeColor = SystemColors.GrayText;
-                        else
-                            treQualities.SelectedNode.ForeColor = SystemColors.WindowText;
+						else if (!objQuality.Implemented)
+							treQualities.SelectedNode.ForeColor = Color.Red;
+						else
+						treQualities.SelectedNode.ForeColor = SystemColors.WindowText;
                     }
                     treQualities.SelectedNode.ToolTipText = objQuality.Notes;
                 }
@@ -12935,24 +12802,27 @@ namespace Chummer
 
         private void nudLifestyleMonths_ValueChanged(object sender, EventArgs e)
         {
-            if (treLifestyles.SelectedNode.Level > 0)
-            {
-                _blnSkipRefresh = true;
+			if (treLifestyles.SelectedNode != null)
+			{
+				if (treLifestyles.SelectedNode.Level > 0)
+				{
+					_blnSkipRefresh = true;
 
-                // Locate the selected Lifestyle.
-                Lifestyle objLifestyle = _objFunctions.FindLifestyle(treLifestyles.SelectedNode.Tag.ToString(), _objCharacter.Lifestyles);
-                if (objLifestyle == null)
-                    return;
+					// Locate the selected Lifestyle.
+					Lifestyle objLifestyle = _objFunctions.FindLifestyle(treLifestyles.SelectedNode.Tag.ToString(), _objCharacter.Lifestyles);
+					if (objLifestyle == null)
+						return;
 
-                objLifestyle.Months = Convert.ToInt32(nudLifestyleMonths.Value);
+					objLifestyle.Months = Convert.ToInt32(nudLifestyleMonths.Value);
 
-                _blnSkipRefresh = false;
-                UpdateCharacterInfo();
-                RefreshSelectedLifestyle();
+					_blnSkipRefresh = false;
+					UpdateCharacterInfo();
+					RefreshSelectedLifestyle();
 
-                _blnIsDirty = true;
-                UpdateWindowTitle();
-            }
+					_blnIsDirty = true;
+					UpdateWindowTitle();
+				}
+			}
         }
 
         private void treGear_AfterSelect(object sender, TreeViewEventArgs e)
@@ -14722,6 +14592,8 @@ namespace Chummer
         #region Other Control Events
         private void nudNuyen_ValueChanged(object sender, EventArgs e)
         {
+	        if (_blnLoading) return;
+
             // Calculate the amount of Nuyen for the selected BP cost.
             _objCharacter.NuyenBP = nudNuyen.Value;
             UpdateCharacterInfo();
@@ -15084,7 +14956,7 @@ namespace Chummer
 
             int intEssenceLoss = 0;
             if (!_objOptions.ESSLossReducesMaximumOnly)
-                intEssenceLoss = _objCharacter.EssencePenalty;
+                intEssenceLoss = Math.Max(0, _objCharacter.EssencePenalty); //bad stuff happens if negative
 
             nudBOD.Maximum = _objCharacter.BOD.TotalMaximum;
             nudAGI.Maximum = _objCharacter.AGI.TotalMaximum;
@@ -15122,7 +14994,7 @@ namespace Chummer
             nudKCHA.Value = _objCharacter.CHA.Karma;
             nudKINT.Value = _objCharacter.INT.Karma;
             nudKLOG.Value = _objCharacter.LOG.Karma;
-            nudKWIL.Value = _objCharacter.WIL.Karma;
+	        nudKWIL.Value = _objCharacter.WIL.Karma;
             nudKEDG.Value = _objCharacter.EDG.Karma;
             nudKMAG.Value = _objCharacter.MAG.Karma;
             nudKRES.Value = _objCharacter.RES.Karma;
@@ -15525,39 +15397,44 @@ namespace Chummer
         /// </summary>
         private int CalculateBP()
         {
-            int intPointsRemain =_objCharacter.BuildKarma;
-            int intPointsUsed = 0;
-            int intEnemyPoints = 0;
-            int intNegativePoints = 0;
+            int intKarmaPointsRemain =_objCharacter.BuildKarma;
+            //int intPointsUsed = 0; // used as a running total for each section
             int intFreestyleBPMin = 0;
             int intFreestyleBP = 0;
             string strPoints = LanguageManager.Instance.GetString("String_Karma");
 
+            // ------------------------------------------------------------------------------
             // Metatype/Metavariant only cost points when working with BP (or when the Metatype Costs Karma option is enabled when working with Karma).
             if ((_objCharacter.BuildMethod == CharacterBuildMethod.Karma || _objCharacter.BuildMethod == CharacterBuildMethod.LifeModule) && _objOptions.MetatypeCostsKarma)
             {
                 // Subtract the BP used for Metatype.
-                intPointsRemain -= (_objCharacter.MetatypeBP * _objOptions.MetatypeCostsKarmaMultiplier);
+                intKarmaPointsRemain -= (_objCharacter.MetatypeBP * _objOptions.MetatypeCostsKarmaMultiplier);
             }
 
             if (_objCharacter.BuildMethod == CharacterBuildMethod.Priority || _objCharacter.BuildMethod == CharacterBuildMethod.SumtoTen)
             {
-                intPointsRemain -= (_objCharacter.MetatypeBP);
+                intKarmaPointsRemain -= (_objCharacter.MetatypeBP);
             }
 
+            // ------------------------------------------------------------------------------
             // Calculate the points used by Contacts.
             int intPointsInContacts = 0;
-            intPointsUsed = 0;
 
             int intContactPoints = _objCharacter.ContactPoints;
             int intContactPointsLeft = intContactPoints;
             int intGroupContacts = 0;
+	        int intHighPlacesFriends = 0;
             foreach (ContactControl objContactControl in panContacts.Controls)
             {
                 //Don't care about free contacts
                 if (objContactControl.ContactObject.Free) continue;
 
-                if (objContactControl.IsGroup == false)
+	            if (objContactControl.ContactObject.Connection >= 8 && _objCharacter.FriendsInHighPlaces)
+	            {
+		            intHighPlacesFriends += (objContactControl.ContactObject.Connection +
+		                                    objContactControl.ContactObject.Loyalty);
+	            }
+                else if (objContactControl.IsGroup == false)
                 {
                     int over = intContactPointsLeft - objContactControl.ContactObject.ContactPoints;
 
@@ -15566,7 +15443,7 @@ namespace Chummer
                     {
                         //over is negative so to add we substract
                         //instead of +abs(over)
-                        intPointsUsed -= over;
+                        intPointsInContacts -= over;
                         intContactPointsLeft = 0; //we went over so we know none are left
                     }
                     else
@@ -15592,42 +15469,66 @@ namespace Chummer
             }
 
             _objCharacter.ContactPointsUsed = intContactPointsLeft;
-            intPointsRemain -= intPointsUsed;
+            
             string strOf = LanguageManager.Instance.GetString("String_Of");
-            if (intPointsUsed < 0)
-            {
-                lblContactsBP.Text = String.Format("{0} " + strOf + " {1}", _objCharacter.ContactPointsUsed, intContactPoints);
-                lblContactPoints.Text = String.Format("{0} " + strOf + " {1}", _objCharacter.ContactPointsUsed, intContactPoints);
-            }
-            else
-            {
-                lblContactsBP.Text = String.Format("{0} " + strOf + " {1} ({2} {3})", _objCharacter.ContactPointsUsed, intContactPoints, intPointsUsed, strPoints);
-                lblContactPoints.Text = String.Format("{0} " + strOf + " {1} ({2} {3})", _objCharacter.ContactPointsUsed, intContactPoints, intPointsUsed, strPoints);
-            }
 
+	        StringBuilder sb = new StringBuilder();
+	        sb.Append(_objCharacter.ContactPointsUsed);
+	        if (_objCharacter.FriendsInHighPlaces)
+	        {
+		        sb.Append('/');
+		        sb.Append(Math.Max(0,(_objCharacter.CHA.Value * 4) -intHighPlacesFriends));
+	        }
+	        sb.Append(' ');
+	        sb.Append(strOf);
+			sb.Append(' ');
 
-            // Calculate the BP used by Enemies. These are added to the BP since they are tehnically
-            // a Negative Quality.
-            intPointsUsed = 0;
+			sb.Append(intContactPoints);
+			if (_objCharacter.FriendsInHighPlaces)
+			{
+				sb.Append('/');
+				sb.Append(_objCharacter.CHA.Value * 4);
+			}
+
+            if (intPointsInContacts > 0 || (_objCharacter.CHA.Value * 4 < intHighPlacesFriends))
+	        {
+                intPointsInContacts += Math.Max(0, intHighPlacesFriends - (_objCharacter.CHA.Value * 4));
+
+		        sb.Append(" (");
+                sb.Append(intPointsInContacts);
+		        sb.Append(' ');
+		        sb.Append(strPoints);
+		        sb.Append(')');
+
+	        }
+			
+			lblContactsBP.Text = sb.ToString();
+			lblContactPoints.Text = sb.ToString();
+			lblPBuildContacts.Text = sb.ToString();
+
+            intKarmaPointsRemain -= intPointsInContacts;
+
+            // ------------------------------------------------------------------------------
+            // Calculate the BP used by Enemies. These are added to the BP since they are technically
+		    // a Negative Quality.
+            int intEnemyPoints = 0;
             foreach (ContactControl objContactControl in panEnemies.Controls)
             {
                 if (!objContactControl.Free)
                 {
                     // The Enemy's Karma cost = their (Connection + Loyalty Rating) x Karma multiplier.
-                    intPointsRemain += (objContactControl.ConnectionRating + objContactControl.LoyaltyRating) * _objOptions.KarmaContact;
-                    intPointsUsed -= (objContactControl.ConnectionRating + objContactControl.LoyaltyRating) * _objOptions.KarmaContact;
-                    intEnemyPoints += (objContactControl.ConnectionRating + objContactControl.LoyaltyRating) * _objOptions.KarmaContact;
-                    intNegativePoints += intPointsUsed;
+                    intEnemyPoints -= (objContactControl.ConnectionRating + objContactControl.LoyaltyRating) * _objOptions.KarmaEnemy;
                 }
             }
-            lblEnemiesBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-            intFreestyleBP += intPointsUsed;
+            lblEnemiesBP.Text = String.Format("{0} " + strPoints, intEnemyPoints.ToString());
 
+                // dont add in enemy costs here, carry it over later under qualities
 
-            // Calculate the BP used by Positive Qualities.
-            intPointsUsed = 0;
-			int intPositiveQualities = intGroupContacts; //group contacts are a quality too
-			int intNegativeQualities = 0;
+            // ------------------------------------------------------------------------------
+            // Calculate the BP used by Qualities.
+            int intQualityPointsUsed = 0;
+			int intPositiveQualities = intGroupContacts; // group contacts are positive qualities
+            int intNegativeQualities = intEnemyPoints;   // enemies are negative qualities
 			int intLifeModuleQualities = 0;
 			int intKnowledgeSkillPoints = _objCharacter.KnowledgeSkillPoints;
             foreach (Quality objQuality in _objCharacter.Qualities)
@@ -15659,111 +15560,116 @@ namespace Chummer
                 }
             }
 
-			intPointsUsed = intLifeModuleQualities + intNegativeQualities + intPositiveQualities;
-			
-			// Deduct the amount for free Qualities.
-			int intPositiveFree = _objImprovementManager.ValueOf(Improvement.ImprovementType.FreePositiveQualities) * _objOptions.KarmaQuality;
-	        intPointsUsed += intPositiveFree;
+            // Deduct the amounts for free Qualities.
+            int intPositiveFree = _objImprovementManager.ValueOf(Improvement.ImprovementType.FreePositiveQualities) * _objOptions.KarmaQuality;
+            int intNegativeFree = _objImprovementManager.ValueOf(Improvement.ImprovementType.FreeNegativeQualities) * _objOptions.KarmaQuality;
 
-			lblPositiveQualitiesBP.Text = String.Format("{0} " + strPoints, intPositiveQualities - intPositiveFree);
-			lblPBuildPositiveQualities.Text = String.Format("{0} " + strPoints, intPositiveQualities - intPositiveFree);
-
-            // Deduct the amount for free Qualities.
-			int intNegativeFree = _objImprovementManager.ValueOf(Improvement.ImprovementType.FreeNegativeQualities) * _objOptions.KarmaQuality;
-	        intPointsUsed += intNegativeFree;
-
-			lblNegativeQualitiesBP.Text = String.Format("{0} " + strPoints, intNegativeQualities - intNegativeFree);
-			lblPBuildNegativeQualities.Text = String.Format("{0} " + strPoints, intNegativeQualities - intNegativeFree);
+            intNegativeQualities -= intNegativeFree;
+            intPositiveQualities -= intPositiveFree;
 
             // If the character is only allowed to gain 25 BP from Negative Qualities but allowed to take as many as they'd like, limit their refunded points.
             if (_objOptions.ExceedNegativeQualitiesLimit)
             {
-				if ((_objCharacter.BuildMethod == CharacterBuildMethod.SumtoTen || _objCharacter.BuildMethod == CharacterBuildMethod.Priority) && intNegativePoints < -1 * _objCharacter.MaxKarma)
+                if ((_objCharacter.BuildMethod == CharacterBuildMethod.SumtoTen || _objCharacter.BuildMethod == CharacterBuildMethod.Priority) && intNegativeQualities < -1 * _objCharacter.MaxKarma)
                 {
-					intNegativeQualities = _objCharacter.MaxKarma;
-                }
-				else if (intNegativePoints < -70)
-                {
-					intNegativeQualities = _objCharacter.MaxKarma;
+                    intNegativeQualities = -1 * _objCharacter.MaxKarma;
                 }
             }
 
-			intPointsRemain -= intPointsUsed;
-			intFreestyleBP += intPointsUsed;
+            intQualityPointsUsed = intLifeModuleQualities + intNegativeQualities + intPositiveQualities;
 
+            lblPositiveQualitiesBP.Text = String.Format("{0} " + strPoints, intPositiveQualities);
+            lblPBuildPositiveQualities.Text = String.Format("{0} " + strPoints, intPositiveQualities);
+
+            lblNegativeQualitiesBP.Text = String.Format("{0} " + strPoints, intNegativeQualities);
+            lblPBuildNegativeQualities.Text = String.Format("{0} " + strPoints, intNegativeQualities);
+
+            intKarmaPointsRemain -= intQualityPointsUsed;
+            intFreestyleBP += intQualityPointsUsed;
+
+            // ------------------------------------------------------------------------------
             // Update Primary Attributes and Special Attributes values.
+            int primaryCost = CalculatePrimaryAttributeBP();
+            int specialCost = CalculateSpecialAttributeBP();
+            int intAttributePointsUsed = primaryCost + specialCost;
+            intKarmaPointsRemain -= intAttributePointsUsed;
+
             if (_objCharacter.BuildMethod != CharacterBuildMethod.Karma)
             {
-                intPointsRemain -= CalculatePrimaryAttributeBP();
-                intPointsUsed = CalculatePrimaryAttributeBP();
-                intFreestyleBPMin = CalculatePrimaryAttributeBP() * 2;
-                intFreestyleBP += intPointsUsed;
-                lblAttributesBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-                intPointsRemain -= CalculateSpecialAttributeBP();
-                intPointsUsed += CalculateSpecialAttributeBP();
-                lblSpecialAttributesBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-                intFreestyleBP += intPointsUsed;
+                intFreestyleBPMin = primaryCost * 2;
+                intFreestyleBP += intAttributePointsUsed;
             }
-            else
-            {
-                intPointsRemain -= CalculatePrimaryAttributeBP();
-                intPointsRemain -= CalculateSpecialAttributeBP();
-                lblSpecialAttributesBP.Text = String.Format("{0} " + strPoints, CalculateSpecialAttributeBP().ToString());
-                lblAttributesBP.Text = String.Format("{0} " + strPoints, CalculatePrimaryAttributeBP().ToString());
-            }
+
+            lblAttributesBP.Text = String.Format("{0} " + strPoints, primaryCost.ToString());
+            lblSpecialAttributesBP.Text = String.Format("{0} " + strPoints, specialCost.ToString());
+
 
             if (nudMysticAdeptMAGMagician.Value > 0)
             {
-                intPointsRemain -= Convert.ToInt32(nudMysticAdeptMAGMagician.Value) * 5;
-                intPointsUsed = Convert.ToInt32(nudMysticAdeptMAGMagician.Value) * 5;
+                intAttributePointsUsed = Convert.ToInt32(nudMysticAdeptMAGMagician.Value) * 5;
+                intKarmaPointsRemain -= intAttributePointsUsed;
             }
 
+            // ------------------------------------------------------------------------------
             // Include the BP used by Martial Arts.
+            int intMartialArtsPoints = 0;
             foreach (MartialArt objMartialArt in _objCharacter.MartialArts)
             {
                 if (!objMartialArt.IsQuality)
                 {
-                    intPointsUsed += (objMartialArt.Rating * 7) * _objOptions.KarmaQuality;
-                    intPointsRemain -= (objMartialArt.Rating * 7) * _objOptions.KarmaQuality;
-
+                    intMartialArtsPoints += (objMartialArt.Rating * 7) * _objOptions.KarmaQuality;
                     // Add in the Techniques
-                    intPointsUsed += (Math.Max(objMartialArt.Advantages.Count - 1, 0) * 5) * _objOptions.KarmaQuality;
-                    intPointsRemain -= (Math.Max(objMartialArt.Advantages.Count - 1, 0) * 5) * _objOptions.KarmaQuality;
+                    intMartialArtsPoints += (Math.Max(objMartialArt.Advantages.Count - 1, 0) * 5) * _objOptions.KarmaQuality;
                 }
             }
+            intKarmaPointsRemain -= intMartialArtsPoints;
 
+            // ------------------------------------------------------------------------------
             // Calculate the BP used by Skill Groups.
+            int intSkillGroupsPoints = 0;
             if (_objCharacter.BuildMethod == CharacterBuildMethod.Priority || _objCharacter.BuildMethod == CharacterBuildMethod.SumtoTen || _objCharacter.BuildMethod == CharacterBuildMethod.LifeModule)
             {
                 // Get the total point value
-                intPointsUsed = 0;
                 foreach (SkillGroupControl objGroupControl in panSkillGroups.Controls)
                 {
                     if (objGroupControl.GroupRating > objGroupControl.GroupRatingMinimum)
                     {
-                        intPointsUsed += objGroupControl.BaseRating - objGroupControl.GroupRatingMinimum;
+                        intSkillGroupsPoints += objGroupControl.BaseRating - objGroupControl.GroupRatingMinimum;
                     }
                     for (int i = 1; i <= objGroupControl.KarmaRating; i++)
                     {
-                        intPointsRemain -= ((Convert.ToInt32(objGroupControl.BaseRating) + i) * _objOptions.KarmaImproveSkillGroup);
+                        intKarmaPointsRemain -= ((Convert.ToInt32(objGroupControl.BaseRating) + i) * _objOptions.KarmaImproveSkillGroup);
+						if (_objCharacter.Uneducated && objGroupControl.HasTechnicalSkills)
+						{
+							intKarmaPointsRemain -= ((Convert.ToInt32(objGroupControl.BaseRating) + i) * _objOptions.KarmaImproveSkillGroup);
+						}
                     }
                 }
             }
             else
             {
-                intPointsUsed = 0;
                 foreach (SkillGroupControl objGroupControl in panSkillGroups.Controls)
                 {
                     if (objGroupControl.GroupRating > objGroupControl.GroupRatingMinimum)
                     {
                         // The first point in a Skill Group costs KaramNewSkillGroup.
                         // Each additional beyond 1 costs i x KarmaImproveSkillGroup.
-                        intPointsRemain -= _objOptions.KarmaNewSkillGroup;
-                        intPointsUsed += _objOptions.KarmaNewSkillGroup;
+                        intKarmaPointsRemain -= _objOptions.KarmaNewSkillGroup;
+                        intSkillGroupsPoints += _objOptions.KarmaNewSkillGroup;
+						if (_objCharacter.Uneducated && objGroupControl.HasTechnicalSkills)
+						{
+							intKarmaPointsRemain -= _objOptions.KarmaNewSkillGroup;
+							intSkillGroupsPoints += _objOptions.KarmaNewSkillGroup;
+						}
                         for (int i = objGroupControl.GroupRatingMinimum + 2; i <= objGroupControl.GroupRating; i++)
                         {
-                            intPointsRemain -= i * _objOptions.KarmaImproveSkillGroup;
-                            intPointsUsed += i * _objOptions.KarmaImproveSkillGroup;
+							if (_objCharacter.Uneducated && objGroupControl.HasTechnicalSkills)
+							{
+								intKarmaPointsRemain -= i * _objOptions.KarmaImproveSkillGroup;
+								intSkillGroupsPoints += i * _objOptions.KarmaImproveSkillGroup;
+							}
+                            intKarmaPointsRemain -= i * _objOptions.KarmaImproveSkillGroup;
+                            intSkillGroupsPoints += i * _objOptions.KarmaImproveSkillGroup;
                         }
                     }
 
@@ -15779,57 +15685,65 @@ namespace Chummer
                                     intMin = objSkill.Rating;
                             }
                         }
-
-                        intPointsRemain -= _objOptions.KarmaNewSkillGroup;
-                        intPointsUsed += _objOptions.KarmaNewSkillGroup;
+						if (_objCharacter.Uneducated && objGroupControl.HasTechnicalSkills)
+						{
+							intKarmaPointsRemain -= _objOptions.KarmaNewSkillGroup;
+							intSkillGroupsPoints += _objOptions.KarmaNewSkillGroup;
+						}
+						intKarmaPointsRemain -= _objOptions.KarmaNewSkillGroup;
+                        intSkillGroupsPoints += _objOptions.KarmaNewSkillGroup;
                         for (int i = 2; i <= intMin; i++)
                         {
-                            intPointsRemain -= i * _objOptions.KarmaImproveSkillGroup;
-                            intPointsUsed += i * _objOptions.KarmaImproveSkillGroup;
+							if (_objCharacter.Uneducated && objGroupControl.HasTechnicalSkills)
+							{
+								intKarmaPointsRemain -= i * _objOptions.KarmaImproveSkillGroup;
+								intSkillGroupsPoints += i * _objOptions.KarmaImproveSkillGroup;
+							}
+                            intKarmaPointsRemain -= i * _objOptions.KarmaImproveSkillGroup;
+                            intSkillGroupsPoints += i * _objOptions.KarmaImproveSkillGroup;
                         }
                     }
                 }
-                lblSkillGroupsBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-                intFreestyleBP += intPointsUsed;
+                lblSkillGroupsBP.Text = String.Format("{0} " + strPoints, intSkillGroupsPoints.ToString());
+                intFreestyleBP += intSkillGroupsPoints;
             }
 
+            // ------------------------------------------------------------------------------
             // Calculate the BP used by Active Skills.
-            intPointsUsed = 0;
+            int intActivePointsUsed = 0;
             if (_objCharacter.BuildMethod == CharacterBuildMethod.Priority || _objCharacter.BuildMethod == CharacterBuildMethod.SumtoTen || _objCharacter.BuildMethod == CharacterBuildMethod.LifeModule)
             {
                 foreach (SkillControl objSkillControl in panActiveSkills.Controls)
                 {
                     for (int i = 1; i <= objSkillControl.SkillKarma; i++)
                     {
-                        intPointsUsed += ((Convert.ToInt32(objSkillControl.SkillBase) + i) * _objOptions.KarmaImproveActiveSkill);
+                        intActivePointsUsed += ((Convert.ToInt32(objSkillControl.SkillBase) + i) * _objOptions.KarmaImproveActiveSkill);
 	                    if ((_objCharacter.Uneducated && objSkillControl.SkillCategory == "Technical Active") ||
-	                        (_objCharacter.Uncouth && objSkillControl.SkillCategory == "Social Active") ||
-	                        (_objCharacter.Infirm && objSkillControl.SkillCategory == "Physical Active"))
+	                        (_objCharacter.Uncouth && objSkillControl.SkillCategory == "Social Active"))
 	                    {
-		                    intPointsUsed += ((Convert.ToInt32(objSkillControl.SkillBase) + i) * _objOptions.KarmaImproveActiveSkill); 
+                            intActivePointsUsed += ((Convert.ToInt32(objSkillControl.SkillBase) + i) * _objOptions.KarmaImproveActiveSkill); 
 	                    }
-						//Jack of All Trades gives a 1 point karma discount for skills below rank 6, but costs 2 extra above that.
-	                    if (_objCharacter.JackOfAllTrades)
+						//Jack of All Trades gives a 1 point karma discount for skills below rank 6, but costs 2 extra above that, minimum cost of 1
+                        if (_objCharacter.Created && _objCharacter.JackOfAllTrades)
 	                    {
 		                    if (i <= 5)
 		                    {
-			                    intPointsUsed -= 1;
+                                if (intActivePointsUsed > 1) intActivePointsUsed -= 1;
 		                    }
 		                    else
 		                    {
-			                    intPointsUsed += 2; 
+                                intActivePointsUsed += 2; 
 		                    }
 	                    }
                     }
                     if (objSkillControl.SkillSpec != "" && objSkillControl.BuyWithKarma && !objSkillControl.SkillObject.ExoticSkill)
-                        intPointsRemain -= _objCharacter.Options.KarmaSpecialization;
+                        intKarmaPointsRemain -= _objCharacter.Options.KarmaSpecialization;
                 }
-                intFreestyleBP += intPointsUsed;
-                intPointsRemain -= intPointsUsed;
+                intFreestyleBP += intActivePointsUsed;
+                intKarmaPointsRemain -= intActivePointsUsed;
             }
             else
             {
-                intPointsUsed = 0;
                 foreach (SkillControl objSkillControl in panActiveSkills.Controls)
                 {
                     if (objSkillControl.SkillRating > objSkillControl.SkillRatingMinimum && !objSkillControl.IsGrouped)
@@ -15839,46 +15753,46 @@ namespace Chummer
 
                         //Uneducated, Uncouth character handler.
                         //First level of skill
-                        if ((_objCharacter.Uneducated && objSkillControl.SkillCategory == "Technical Active") || (_objCharacter.Uncouth && objSkillControl.SkillCategory == "Social Active") || (_objCharacter.Infirm && objSkillControl.SkillCategory == "Physical Active"))
+                        if ((_objCharacter.Uneducated && objSkillControl.SkillCategory == "Technical Active") || (_objCharacter.Uncouth && objSkillControl.SkillCategory == "Social Active"))
                         {
-                            intPointsRemain -= _objOptions.KarmaNewActiveSkill * 2;
-                            intPointsUsed += _objOptions.KarmaNewActiveSkill * 2;
+                            intKarmaPointsRemain -= _objOptions.KarmaNewActiveSkill * 2;
+                            intActivePointsUsed += _objOptions.KarmaNewActiveSkill * 2;
                         }
                         else
                         {
-                            intPointsRemain -= _objOptions.KarmaNewActiveSkill;
-                            intPointsUsed += _objOptions.KarmaNewActiveSkill;
+                            intKarmaPointsRemain -= _objOptions.KarmaNewActiveSkill;
+                            intActivePointsUsed += _objOptions.KarmaNewActiveSkill;
                         }
-	                    if (_objCharacter.JackOfAllTrades)
+	                    if (_objCharacter.Created && _objCharacter.JackOfAllTrades && (_objOptions.KarmaNewActiveSkill > 1))
 	                    {
-							intPointsRemain += 1;
-							intPointsUsed -= 1;
+                            intKarmaPointsRemain += 1;
+                            intActivePointsUsed -= 1;
 						}
                         //Subsequent levels of skills
                         for (int i = objSkillControl.SkillRatingMinimum + 2; i <= objSkillControl.SkillRating; i++)
                         {
                             if ((_objCharacter.Uneducated && objSkillControl.SkillCategory == "Technical Active") || (_objCharacter.Uncouth && objSkillControl.SkillCategory == "Social Active"))
                             {
-                                intPointsRemain -= (i * _objOptions.KarmaImproveActiveSkill) * 2;
-                                intPointsUsed += (i * _objOptions.KarmaImproveActiveSkill * 2);
+                                intKarmaPointsRemain -= (i * _objOptions.KarmaImproveActiveSkill) * 2;
+                                intActivePointsUsed += (i * _objOptions.KarmaImproveActiveSkill * 2);
                             }
                             else
                             {
-                                intPointsRemain -= i * _objOptions.KarmaImproveActiveSkill;
-                                intPointsUsed += i * _objOptions.KarmaImproveActiveSkill;
+                                intKarmaPointsRemain -= i * _objOptions.KarmaImproveActiveSkill;
+                                intActivePointsUsed += i * _objOptions.KarmaImproveActiveSkill;
                             }
 
-							if (_objCharacter.JackOfAllTrades)
+							if (_objCharacter.Created && _objCharacter.JackOfAllTrades)
 							{
 								if (objSkillControl.SkillRating <= 5)
 								{
-									intPointsRemain += 1;
-									intPointsUsed -= 1;
+                                    intKarmaPointsRemain += 1;
+                                    intActivePointsUsed -= 1;
 								}
 								else
 								{
-									intPointsRemain -= 2;
-									intPointsUsed += 2;
+                                    intKarmaPointsRemain -= 2;
+                                    intActivePointsUsed += 2;
 								}
 							}
 						}
@@ -15915,15 +15829,15 @@ namespace Chummer
                                 // Refund the first X points of Karma cost for the Skill.
                                 if (intMin >= 1)
                                 {
-                                    intPointsRemain += _objOptions.KarmaNewActiveSkill;
-                                    intPointsUsed -= _objOptions.KarmaNewActiveSkill;
+                                    intKarmaPointsRemain += _objOptions.KarmaNewActiveSkill;
+                                    intActivePointsUsed -= _objOptions.KarmaNewActiveSkill;
                                 }
                                 if (intMin > 1)
                                 {
                                     for (int i = 2; i <= intMin; i++)
                                     {
-                                        intPointsRemain += i * _objOptions.KarmaImproveActiveSkill;
-                                        intPointsUsed -= i * _objOptions.KarmaImproveActiveSkill;
+                                        intKarmaPointsRemain += i * _objOptions.KarmaImproveActiveSkill;
+                                        intActivePointsUsed -= i * _objOptions.KarmaImproveActiveSkill;
                                     }
                                 }
                             }
@@ -15936,113 +15850,105 @@ namespace Chummer
                         if (objSkillControl.BuyWithKarma)
                         {
                             // Each Specialization costs KarmaSpecialization.
-                            intPointsRemain -= _objOptions.KarmaSpecialization;
-                            intPointsUsed += _objOptions.KarmaSpecialization;
+                            intKarmaPointsRemain -= _objOptions.KarmaSpecialization;
+                            intActivePointsUsed += _objOptions.KarmaSpecialization;
                         }
                     }
                 }
 
-                lblActiveSkillsBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-                intFreestyleBP += intPointsUsed;
+                lblActiveSkillsBP.Text = String.Format("{0} " + strPoints, intActivePointsUsed.ToString());
+                intFreestyleBP += intActivePointsUsed;
             }
 
+            // ------------------------------------------------------------------------------
             // Calculate the points used by Knowledge Skills.
-            int intPointsInKnowledgeSkills = 0;
-            intPointsUsed = 0;
-
-            foreach (SkillControl objSkillControl in panKnowledgeSkills.Controls)
+            int knowledgeFreePointsUsed = 0;
+            int knowledgeKarmaUsed = 0;
+			foreach (SkillControl objSkillControl in panKnowledgeSkills.Controls)
             {
-                for (int i = 1; i <= objSkillControl.SkillRating; i++)
-                {
-                    //First level of skill purchased with Karma
-                    if (objSkillControl.SkillBase == 0 && objSkillControl.SkillRating >= 1)
+                // start at 1, look at each point in the skill in turn and determine its cost
+                int ii = 1;
+                if (objSkillControl.SkillRating > 0) 
+                { 
+                    // points that came from skill points
+                    while (ii <= objSkillControl.SkillBase)
                     {
-                        intPointsUsed += _objOptions.KarmaNewKnowledgeSkill;
+                        int cost = 1;
+                        // check for free double levels from qualities (make every other point free)
+                        if ((_objCharacter.SchoolOfHardKnocks && objSkillControl.SkillCategory == "Street") ||
+                                (_objCharacter.Linguist && objSkillControl.SkillCategory == "Language") ||
+                                (_objCharacter.TechSchool && objSkillControl.SkillCategory == "Professional") ||
+                                (_objCharacter.CollegeEducation && objSkillControl.SkillCategory == "Academic"))
+                        {
+                            if (ii%2 ==0) cost = 0;
+                        }
+                        knowledgeFreePointsUsed += cost;
+                        ii++;
+                    }
 
-                        //Skip a level for the 2-for-1 deals.
-                        if ((_objCharacter.SchoolOfHardKnocks && objSkillControl.SkillCategory == "Street") || (_objCharacter.Linguist && objSkillControl.SkillCategory == "Language") || (_objCharacter.CollegeEducation && objSkillControl.SkillCategory == "Academic"))
-                        {
-                            i++;
-                        }
-                    }
-                    //Loop through skill points until we run out, then start spending karma
-                    if (i <= objSkillControl.SkillBase)
+                    // points that came from karma
+                    while (ii <= objSkillControl.SkillRating)
                     {
-                        //Skip a level for the 2-for-1 deals.
-                        if ((_objCharacter.SchoolOfHardKnocks && objSkillControl.SkillCategory == "Street") || (_objCharacter.Linguist && objSkillControl.SkillCategory == "Language") || (_objCharacter.CollegeEducation && objSkillControl.SkillCategory == "Academic"))
-                        {
-                            i++;
-                        }
-                        intPointsInKnowledgeSkills++;
-                    }
-                    else
-                    {
-                        //Subsequent levels of skills
-                        for (i = 2; i <= objSkillControl.SkillRating; i++)
-                        {
-                            //Skip a level for the 2-for-1 deals.
-                            if ((_objCharacter.SchoolOfHardKnocks && objSkillControl.SkillCategory == "Street") || (_objCharacter.Linguist && objSkillControl.SkillCategory == "Language") || (_objCharacter.CollegeEducation && objSkillControl.SkillCategory == "Academic"))
-                            {
-                                i++;
-                            }
-                            else if (_objCharacter.Uneducated && (objSkillControl.SkillCategory == "Academic" || objSkillControl.SkillCategory == "Professional"))
-                            {
-                                intPointsUsed += i * _objOptions.KarmaImproveKnowledgeSkill;
-                            }
-                        }
-                        intPointsUsed += i * _objOptions.KarmaImproveKnowledgeSkill;
-                    }
-                }
+                        int costThisLevel = ii * _objOptions.KarmaImproveKnowledgeSkill;
+                        // was the first point bought with Karma
+                        if (ii == 1) 
+                            costThisLevel = _objOptions.KarmaNewKnowledgeSkill;
+                    
+                        // check for qualities that raise/lower cost for later ranks
+                        if (_objCharacter.Uneducated && (objSkillControl.SkillCategory == "Academic" || objSkillControl.SkillCategory == "Professional"))
+						{
+                            costThisLevel *= 2;
+						}
 
-                if (objSkillControl.SkillSpec.Trim() != string.Empty)
-                {
-                    bool blnFound = false;
-                    if (objSkillControl.SkillName == "Artisan")
-                    {
-                        // Look for the Inspired quality to see if we get a free specialization
-                        foreach (Quality objQuality in _objCharacter.Qualities)
-                        {
-                            if (objQuality.Name == "Inspired")
-                                blnFound = true;
+                        if (ii >= 3) {
+                            if ((_objCharacter.SchoolOfHardKnocks && objSkillControl.SkillCategory == "Street") ||
+                                (_objCharacter.Linguist && objSkillControl.SkillCategory == "Language") ||
+                                (_objCharacter.TechSchool && objSkillControl.SkillCategory == "Professional") ||
+                                (_objCharacter.CollegeEducation && objSkillControl.SkillCategory == "Academic"))
+                            {
+                                costThisLevel--;
+                            }
                         }
+                        // note: don't check for Jack of all Trades during creation mode
+
+                        knowledgeKarmaUsed += costThisLevel;
+                        ii++;
                     }
-                    if (!blnFound && !objSkillControl.BuyWithKarma)
-                        intPointsInKnowledgeSkills++;
-                    else if (!blnFound)
-                        intPointsRemain -= _objCharacter.Options.KarmaSpecialization;
+
+                    // did we buy a specialization?
+                    if (objSkillControl.SkillSpec.Trim() != string.Empty)
+                    {
+                        if (!objSkillControl.BuyWithKarma)
+                            knowledgeFreePointsUsed++;
+                        else
+                            knowledgeKarmaUsed += _objCharacter.Options.KarmaSpecialization;
+                    }
                 }
             }
 
-            _objCharacter.KnowledgeSkillPointsUsed = intKnowledgeSkillPoints - intPointsInKnowledgeSkills;
-
-            intPointsUsed = 0;
-
-                foreach (SkillControl objSkillControl in panKnowledgeSkills.Controls)
-                {
-                    for (int i = 1; i <= objSkillControl.SkillKarma; i++)
-                    {
-                        intPointsUsed += ((Convert.ToInt32(objSkillControl.SkillBase) + i) * _objOptions.KarmaImproveKnowledgeSkill);
-                    }
-                }
-            intPointsRemain -= intPointsUsed;
+            _objCharacter.KnowledgeSkillPointsUsed = intKnowledgeSkillPoints - knowledgeFreePointsUsed;
+            intKarmaPointsRemain -= knowledgeKarmaUsed;
 
             // Update the label that displays the number of free Knowledge Skill points remaining.
-            lblKnowledgeSkillPoints.Text = String.Format("{0} " + LanguageManager.Instance.GetString("String_Of") + " {1}", (intKnowledgeSkillPoints - intPointsInKnowledgeSkills).ToString(), intKnowledgeSkillPoints.ToString());
-            lblPBuildKnowledgeSkills.Text = String.Format("{0} " + LanguageManager.Instance.GetString("String_Of") + " {1}", (intKnowledgeSkillPoints - intPointsInKnowledgeSkills).ToString(), intKnowledgeSkillPoints.ToString());
-            lblKnowledgeSkillsBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-            intFreestyleBP += intPointsUsed;
+            lblKnowledgeSkillPoints.Text = String.Format("{0} " + LanguageManager.Instance.GetString("String_Of") + " {1}", (intKnowledgeSkillPoints - knowledgeFreePointsUsed).ToString(), intKnowledgeSkillPoints.ToString());
+            lblPBuildKnowledgeSkills.Text = lblKnowledgeSkillPoints.Text;
+            lblKnowledgeSkillsBP.Text = String.Format("{0} " + strPoints, knowledgeKarmaUsed.ToString());
+            intFreestyleBP += knowledgeKarmaUsed;
 
+            // ------------------------------------------------------------------------------
             // Calculate the BP used by Resources/Nuyen.
-            intPointsRemain -= (int)nudNuyen.Value;
+            intKarmaPointsRemain -= (int)nudNuyen.Value;
             lblNuyenBP.Text = nudNuyen.Value.ToString() + " " + strPoints;
 
             intFreestyleBP += (int)nudNuyen.Value;
 
+            // ------------------------------------------------------------------------------
             // Calculate the BP discounted by Adept Way for Bonded Foci
-            intPointsRemain += (int)nudAdeptWayDiscount.Value * 2;
+            intKarmaPointsRemain += (int)nudAdeptWayDiscount.Value * 2;
 
+            // ------------------------------------------------------------------------------
             // Calculate the BP used by Spells.
-            intPointsUsed = 0;
+            int intSpellPointsUsed = 0;
             if (_objCharacter.MagicianEnabled)
             {
                 // Count the number of Spells the character currently has and make sure they do not try to select more Spells than they are allowed.
@@ -16057,15 +15963,16 @@ namespace Chummer
                 }
 
                 // Each spell costs KarmaSpell.
-                intPointsRemain -= Math.Max(0, intSpellCount - _objCharacter.SpellLimit) * _objOptions.KarmaSpell;
-                intPointsUsed += Math.Max(0, intSpellCount - _objCharacter.SpellLimit) * _objOptions.KarmaSpell;
-                tipTooltip.SetToolTip(lblSpellsBP, intSpellCount.ToString() + " x " + _objOptions.KarmaSpell + " " + LanguageManager.Instance.GetString("String_Karma") + " = " + intPointsUsed.ToString() + " " + LanguageManager.Instance.GetString("String_Karma"));
+                intKarmaPointsRemain -= Math.Max(0, intSpellCount - _objCharacter.SpellLimit) * _objOptions.KarmaSpell;
+                intSpellPointsUsed += Math.Max(0, intSpellCount - _objCharacter.SpellLimit) * _objOptions.KarmaSpell;
+                tipTooltip.SetToolTip(lblSpellsBP, intSpellCount.ToString() + " x " + _objOptions.KarmaSpell + " " + LanguageManager.Instance.GetString("String_Karma") + " = " + intSpellPointsUsed.ToString() + " " + LanguageManager.Instance.GetString("String_Karma"));
             }
-            lblSpellsBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-            intFreestyleBP += intPointsUsed;
+            lblSpellsBP.Text = String.Format("{0} " + strPoints, intSpellPointsUsed.ToString());
+            intFreestyleBP += intSpellPointsUsed;
 
+            // ------------------------------------------------------------------------------
             // Calculate the BP used by Foci.
-            intPointsUsed = 0;
+            int intFociPointsUsed = 0;
             foreach (Focus objFocus in _objCharacter.Foci)
             {
                 // Each Focus costs an amount of Karma equal to their Force x speicific Karma cost.
@@ -16131,8 +16038,8 @@ namespace Chummer
                         intKarmaMultiplier = 1;
                         break;
                 }
-                intPointsRemain -= objFocus.Rating * intKarmaMultiplier;
-                intPointsUsed += objFocus.Rating * intKarmaMultiplier;
+                intKarmaPointsRemain -= objFocus.Rating * intKarmaMultiplier;
+                intFociPointsUsed += objFocus.Rating * intKarmaMultiplier;
             }
 
             // Calculate the BP used by Stacked Foci.
@@ -16140,56 +16047,60 @@ namespace Chummer
             {
                 if (objFocus.Bonded)
                 {
-                    intPointsRemain -= objFocus.BindingCost;
-                    intPointsUsed += objFocus.BindingCost;
+                    intKarmaPointsRemain -= objFocus.BindingCost;
+                    intFociPointsUsed += objFocus.BindingCost;
                 }
             }
 
-            lblFociBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-            intFreestyleBP += intPointsUsed;
+            lblFociBP.Text = String.Format("{0} " + strPoints, intFociPointsUsed.ToString());
+            intFreestyleBP += intFociPointsUsed;
 
+            // ------------------------------------------------------------------------------
             // Calculate the BP used by Spirits.
-            intPointsUsed = 0;
+            int intSpiritPointsUsed = 0;
             foreach (SpiritControl objSpiritControl in panSpirits.Controls)
             {
                 // Each Spirit costs KarmaSpirit x Services Owed.
-                intPointsRemain -= objSpiritControl.ServicesOwed * _objOptions.KarmaSpirit;
-                intPointsUsed += objSpiritControl.ServicesOwed * _objOptions.KarmaSpirit;
+                intKarmaPointsRemain -= objSpiritControl.ServicesOwed * _objOptions.KarmaSpirit;
+                intSpiritPointsUsed += objSpiritControl.ServicesOwed * _objOptions.KarmaSpirit;
             }
-            lblSpiritsBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-            intFreestyleBP += intPointsUsed;
+            lblSpiritsBP.Text = String.Format("{0} " + strPoints, intSpiritPointsUsed.ToString());
+            intFreestyleBP += intSpiritPointsUsed;
 
+            // ------------------------------------------------------------------------------
             // Calculate the BP used by Sprites.
-            intPointsUsed = 0;
+            int intSpritePointsUsed = 0;
             foreach (SpiritControl objSpriteControl in panSprites.Controls)
             {
                 // Each Sprite costs KarmaSpirit x Services Owed.
-                intPointsRemain -= objSpriteControl.ServicesOwed * _objOptions.KarmaSpirit;
-                intPointsUsed += objSpriteControl.ServicesOwed * _objOptions.KarmaSpirit;
+                intKarmaPointsRemain -= objSpriteControl.ServicesOwed * _objOptions.KarmaSpirit;
+                intSpritePointsUsed += objSpriteControl.ServicesOwed * _objOptions.KarmaSpirit;
             }
-            lblSpritesBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-            intFreestyleBP += intPointsUsed;
+            lblSpritesBP.Text = String.Format("{0} " + strPoints, intSpritePointsUsed.ToString());
+            intFreestyleBP += intSpritePointsUsed;
 
+            // ------------------------------------------------------------------------------
             // Calculate the BP used by Complex Forms.
-            intPointsUsed = 0;
+            int intFormsPointsUsed = 0;
             foreach (ComplexForm objProgram in _objCharacter.ComplexForms)
             {
-                intPointsUsed += 1;
+                intFormsPointsUsed += 1;
             }
-            if (intPointsUsed > _objCharacter.CFPLimit)
-                intPointsRemain -= (intPointsUsed - _objCharacter.CFPLimit) * _objOptions.KarmaNewComplexForm;
-            lblComplexFormsBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-            intFreestyleBP += intPointsUsed;
+            if (intFormsPointsUsed > _objCharacter.CFPLimit)
+                intKarmaPointsRemain -= (intFormsPointsUsed - _objCharacter.CFPLimit) * _objOptions.KarmaNewComplexForm;
+            lblComplexFormsBP.Text = String.Format("{0} " + strPoints, intFormsPointsUsed.ToString());
+            intFreestyleBP += intFormsPointsUsed;
 
+            // ------------------------------------------------------------------------------
             // Calculate the BP used by Martial Art Maneuvers.
             // Each Maneuver costs KarmaManeuver.
-            intPointsRemain -= _objCharacter.MartialArtManeuvers.Count * _objOptions.KarmaManeuver;
-            intPointsUsed = _objCharacter.MartialArtManeuvers.Count * _objOptions.KarmaManeuver;
-            lblManeuversBP.Text = String.Format("{0} " + strPoints, intPointsUsed.ToString());
-            intFreestyleBP += intPointsUsed;
+            int intManeuverPointsUsed = _objCharacter.MartialArtManeuvers.Count * _objOptions.KarmaManeuver;
+            lblManeuversBP.Text = String.Format("{0} " + strPoints, intManeuverPointsUsed.ToString());
+            intFreestyleBP += intManeuverPointsUsed;
+            intKarmaPointsRemain -= intManeuverPointsUsed;
 
+            // ------------------------------------------------------------------------------
             // Calculate the BP used by Initiation.
-            intPointsUsed = 0;
             int intInitiationPoints = 0;
             foreach (InitiationGrade objGrade in _objCharacter.InitiationGrades)
             {
@@ -16230,14 +16141,14 @@ namespace Chummer
             if (_objCharacter.GroupMember && _objCharacter.MAGEnabled)
                 intInitiationPoints += _objOptions.KarmaJoinGroup;
 
-            intPointsRemain -= intInitiationPoints;
-            intPointsUsed += intInitiationPoints;
-            lblInitiationBP.Text = string.Format("{0} " + strPoints, intPointsUsed.ToString());
-            intFreestyleBP += intPointsUsed;
+            intKarmaPointsRemain -= intInitiationPoints;
+            lblInitiationBP.Text = string.Format("{0} " + strPoints, intInitiationPoints.ToString());
+            intFreestyleBP += intInitiationPoints;
 
+            // ------------------------------------------------------------------------------
             // Update the number of BP remaining in the StatusBar.
             tssBP.Text = _objCharacter.BuildKarma.ToString();
-            tssBPRemain.Text = intPointsRemain.ToString();
+            tssBPRemain.Text = intKarmaPointsRemain.ToString();
 
             if (_blnFreestyle)
             {
@@ -16298,6 +16209,9 @@ namespace Chummer
             {
                 string strTip = "";
                 _blnSkipUpdate = true;
+
+				//Redliner/Cyber Singularity Seeker(hackish)
+	            RedlinerCheck();  
 
                 // Calculate the character's move.
                 string strMovement = "";
@@ -17210,17 +17124,58 @@ namespace Chummer
 
         public void RefreshContacts()
         {
-            foreach (Control contact in panContacts.Controls)
-            {
-                // Probably won't find subclass, but don't wan't to track
-                // down bug about contacts in 4 months because i by some 
-                // retarded version decided to overload ContactControl
-                if (contact.GetType() == typeof(ContactControl) ||
-                    contact.GetType().IsSubclassOf(typeof(ContactControl)))
-                {
-                    ContactControl contactControl = (ContactControl) contact;
-                }
-            }
+			HashSet<Contact> existing = new HashSet<Contact>();
+
+
+	        for (int i = panContacts.Controls.Count - 1; i >= 0; i--)
+	        {
+				Control contact = panContacts.Controls[i];
+                ContactControl contactControl = (ContactControl)contact;
+
+				if (contactControl != null)
+				{
+					if (_objCharacter.Contacts.Contains(contactControl.ContactObject))
+					{
+						contactControl.LoyaltyRating = contactControl.LoyaltyRating; //Force refresh
+						contactControl.UpdateQuickText();
+						existing.Add(contactControl.ContactObject);
+					}
+					else
+					{
+						objContact_DeleteContact(contactControl, true);
+					}
+						
+				}
+			}
+
+			//Sync panContacts to character.contacts
+			//objContactControl.ConnectionRatingChanged += objContact_ConnectionRatingChanged;
+			//objContactControl.LoyaltyRatingChanged += objContact_LoyaltyRatingChanged;
+			//objContactControl.DeleteContact += objContact_DeleteContact;
+			//objContactControl.FileNameChanged += objContact_FileNameChanged;
+
+	        var newcontacts = from contact in _objCharacter.Contacts
+							  where contact.EntityType == ContactType.Contact 
+							  && !existing.Contains(contact)
+							  select contact;
+
+	        foreach (Contact contact in newcontacts)
+	        {
+		        ContactControl ctrl = new ContactControl(_objCharacter);
+				ctrl.ContactObject = contact;
+
+				ctrl.ConnectionRatingChanged += objContact_ConnectionRatingChanged;
+				ctrl.LoyaltyRatingChanged += objContact_LoyaltyRatingChanged;
+				ctrl.DeleteContact += objContact_DeleteContact;
+				ctrl.FileNameChanged += objContact_FileNameChanged;
+                ctrl.FreeRatingChanged += objContact_OtherCostChanged;
+
+
+		        ctrl.LoyaltyRating = ctrl.LoyaltyRating;
+		        ctrl.ConnectionRating = ctrl.ConnectionRating;
+				panContacts.Controls.Add(ctrl);
+			}
+
         }
 
         public void RefreshPowers()
@@ -18569,7 +18524,22 @@ namespace Chummer
                 treWeapons.Nodes[0].Expand();
             }
 
-            _objFunctions.SortTree(treCyberware);
+			// Add any additional Qualities that are forced on the character.
+			if (objXmlCyberware.SelectNodes("addqualities/addquality").Count > 0)
+			{
+				XmlDocument objXmlQuality = XmlManager.Instance.Load("qualities.xml");
+				foreach (XmlNode objXmlAddQuality in objXmlCyberware.SelectNodes("addqualities/addquality"))
+				{
+					XmlNode objXmlSelectedQuality = objXmlQuality.SelectSingleNode("/chummer/qualities/quality[name = \"" + objXmlAddQuality.InnerText + "\"]");
+					Quality objSubQuality = AddQuality(objXmlAddQuality, objXmlSelectedQuality, objWeapons, objWeaponNodes);
+					if (objSubQuality != null)
+					{
+						_objCharacter.Qualities.Add(objSubQuality);
+					}
+				}
+			}
+
+			_objFunctions.SortTree(treCyberware);
             treCyberware.SelectedNode = objNode;
             _blnSkipRefresh = true;
             PopulateCyberwareGradeList();
@@ -19076,51 +19046,51 @@ namespace Chummer
                         strBaseLifestyle = objNode["translate"].InnerText;
                     else
                         strBaseLifestyle = objNode["name"].InnerText;
+					
+					foreach (LifestyleQuality objQuality in objLifestyle.LifestyleQualities)
+					{
+						if (strQualities.Length > 0)
+							strQualities += ", ";
+						string strQualityName = objQuality.DisplayName;
+						objNode = objXmlDocument.SelectSingleNode("/chummer/qualities/quality[name = \"" + strQualityName + "\"]");
+						XmlNode nodCost = objNode["lifestylecost"];
+						if (nodCost != null)
+						{
+							string strCost = nodCost.InnerText;
+							int intCost = Convert.ToInt32(strCost);
+							if (intCost > 0)
+							{
+								if (objNode["translate"] != null)
+									strQualities += objNode["translate"].InnerText + " [+" + intCost.ToString() + "%]";
+								else
+									strQualities += objNode["name"].InnerText + " [+" + intCost.ToString() + "%]";
+							}
+							else
+							{
+								if (objNode["translate"] != null)
+									strQualities += objNode["translate"].InnerText + " [" + intCost.ToString() + "%]";
+								else
+									strQualities += objNode["name"].InnerText + " [" + intCost.ToString() + "%]";
+							}
+						}
+						else
+						{
+							if (objNode["cost"] != null)
+							{
+								string strCost = objNode["cost"].InnerText;
+								if (objNode["translate"] != null)
+									strQualities += objNode["translate"].InnerText + " [" + strCost + "包";
+								else
+									strQualities += objNode["name"].InnerText + " [" + strCost + "包";
+							}
+							else
+							{
+								strQualities += objNode["name"].InnerText;
+							}
+						}
+					}
 
-                    foreach (string strQuality in objLifestyle.LifestyleQualities)
-                    {
-                        if (strQualities.Length > 0)
-                            strQualities += ", ";
-                        string strQualityName = strQuality.ToString();
-                        objNode = objXmlDocument.SelectSingleNode("/chummer/qualities/quality[name = \"" + strQualityName + "\"]");
-                        XmlNode nodCost = objNode["lifestylecost"];
-                        if (nodCost != null)
-                        {
-                            string strCost = nodCost.InnerText;
-                            int intCost = Convert.ToInt32(strCost);
-                            if (intCost > 0)
-                            {
-                                if (objNode["translate"] != null)
-                                    strQualities += objNode["translate"].InnerText + " [+" + intCost.ToString() + "%]";
-                                else
-                                    strQualities += objNode["name"].InnerText + " [+" + intCost.ToString() + "%]";
-                            }
-                            else
-                            {
-                                if (objNode["translate"] != null)
-                                    strQualities += objNode["translate"].InnerText + " [" + intCost.ToString() + "%]";
-                                else
-                                    strQualities += objNode["name"].InnerText + " [" + intCost.ToString() + "%]";
-                            }
-                        }
-                        else
-                        {
-                            if (objNode["cost"] != null)
-                            {
-                                string strCost = objNode["cost"].InnerText;
-                                if (objNode["translate"] != null)
-                                    strQualities += objNode["translate"].InnerText + " [" + strCost + "包";
-                                else
-                                    strQualities += objNode["name"].InnerText + " [" + strCost + "包";
-                            }
-                            else
-                            {
-                                strQualities += objNode["name"].InnerText;
-                            }
-                        }
-                    }
-
-                    foreach (Improvement objImprovement in _objCharacter.Improvements)
+					foreach (Improvement objImprovement in _objCharacter.Improvements)
                     {
                         if (objImprovement.ImproveType == Improvement.ImprovementType.LifestyleCost)
                         {
@@ -20064,126 +20034,156 @@ namespace Chummer
             string strCyberwareGrade = "";
 
             // Check limits specific to the Priority build method.
-            if (_objCharacter.BuildMethod == CharacterBuildMethod.Priority || _objCharacter.BuildMethod == CharacterBuildMethod.SumtoTen)
-            {
-                // Check if the character has more than 1 Martial Art
-                int intMartialArts = _objCharacter.MartialArts.Count;
-                if (intMartialArts > 1)
-                    strMessage += "\n\t" + LanguageManager.Instance.GetString("Message_InvalidPointExcess").Replace("{0}", ((1 - intMartialArts) * -1).ToString() + " " + LanguageManager.Instance.GetString("String_MartialArtsCount"));
+	        if (_objCharacter.BuildMethod == CharacterBuildMethod.Priority ||
+	            _objCharacter.BuildMethod == CharacterBuildMethod.SumtoTen)
+	        {
+		        // Check if the character has more than 1 Martial Art
+		        int intMartialArts = _objCharacter.MartialArts.Count;
+		        if (intMartialArts > 1)
+			        strMessage += "\n\t" +
+			                      LanguageManager.Instance.GetString("Message_InvalidPointExcess")
+				                      .Replace("{0}",
+					                      ((1 - intMartialArts)*-1).ToString() + " " +
+					                      LanguageManager.Instance.GetString("String_MartialArtsCount"));
 
-                // Check if the character has more than 5 Techniques in a Martial Art
-                if (_objCharacter.MartialArts.Count > 0)
-                {
-                    int intTechniques = _objCharacter.MartialArts[0].Advantages.Count;
-                    if (intTechniques > 5)
-                        strMessage += "\n\t" + LanguageManager.Instance.GetString("Message_InvalidPointExcess").Replace("{0}", ((5 - intTechniques) * -1).ToString() + " " + LanguageManager.Instance.GetString("String_TechniquesCount"));
-                }
+		        // Check if the character has more than 5 Techniques in a Martial Art
+		        if (_objCharacter.MartialArts.Count > 0)
+		        {
+			        int intTechniques = _objCharacter.MartialArts[0].Advantages.Count;
+			        if (intTechniques > 5)
+				        strMessage += "\n\t" +
+				                      LanguageManager.Instance.GetString("Message_InvalidPointExcess")
+					                      .Replace("{0}",
+						                      ((5 - intTechniques)*-1).ToString() + " " +
+						                      LanguageManager.Instance.GetString("String_TechniquesCount"));
+		        }
 
-                // Check if the character has gone over limits from optional rules
-                int intContactPointsUsed = 0;
-                int intGroupContacts = 0;
-                foreach (ContactControl objContactControl in panContacts.Controls)
-                {
-                    if (!objContactControl.Free)
-                    {
-                        if (objContactControl.IsGroup)
-                        {
-                            intGroupContacts += objContactControl.ContactObject.ContactPoints;
-                        }
-                        else
-                        {
-                            // The Contact's BP cost = their Connection + Loyalty Rating.
-                            intContactPointsUsed += (objContactControl.ConnectionRating +
-                                                     objContactControl.LoyaltyRating)*_objOptions.BPContact;
-                        }
-                    }
-                }
+		        // Check if the character has gone over limits from optional rules
+		        int intContactPointsUsed = 0;
+		        int intGroupContacts = 0;
+		        int intHighPlaces = 0;
+		        foreach (ContactControl objContactControl in panContacts.Controls)
+		        {
+			        if (!objContactControl.Free)
+			        {
+				        if (objContactControl.IsGroup)
+				        {
+					        intGroupContacts += objContactControl.ContactObject.ContactPoints;
+				        }
+				        else if (objContactControl.ConnectionRating >= 8 && _objCharacter.FriendsInHighPlaces)
+				        {
+					        intHighPlaces += (objContactControl.ConnectionRating +
+					                          objContactControl.LoyaltyRating);
+				        }
+				        else
+				        {
+					        // The Contact's BP cost = their Connection + Loyalty Rating.
+					        intContactPointsUsed += (objContactControl.ConnectionRating +
+					                                 objContactControl.LoyaltyRating)*_objOptions.BPContact;
+				        }
 
-                // If the option for CHA * X free points of Contacts is enabled, deduct that amount of points (or as many points have been spent if not the full amount).
-                int intFreePoints = (_objCharacter.CHA.TotalValue * _objOptions.FreeContactsMultiplier);
+			        }
+		        }
 
-                if (intContactPointsUsed >= intFreePoints)
-                {
-                    intContactPointsUsed -= intFreePoints;
-                }
-                else
-                {
-                    intContactPointsUsed = 0;
-                }
+		        // If the option for CHA * X free points of Contacts is enabled, deduct that amount of points (or as many points have been spent if not the full amount).
+		        int intFreePoints = (_objCharacter.CHA.TotalValue*_objOptions.FreeContactsMultiplier);
 
-                //if (intContactPointsUsed > _objCharacter.ContactPoints)
-                //    strMessage += "\n\t" + LanguageManager.Instance.GetString("Message_InvalidPointExcess").Replace("{0}", ((_objCharacter.ContactPoints - intContactPointsUsed) * -1).ToString() + " " + LanguageManager.Instance.GetString("String_Contacts"));
-            
+		        if (intContactPointsUsed >= intFreePoints)
+		        {
+			        intContactPointsUsed -= intFreePoints;
+		        }
+		        else
+		        {
+			        intContactPointsUsed = 0;
+		        }
 
-                // Check if the character has  positive qualities outnumbering negative qualities
-                // Calculate the BP used by Enemies. These are added to the BP since they are tehnically
-                // a Negative Quality.
-                int intPointsUsed = 0;
-                int intNegativePoints = 0;
-                foreach (ContactControl objContactControl in panEnemies.Controls)
-                {
-                    if (!objContactControl.Free)
-                    {
-                        // The Enemy's BP cost = their Connection + Loyalty Rating.
-                        intPointsUsed -= (objContactControl.ConnectionRating + objContactControl.LoyaltyRating) * _objOptions.BPContact;
-                        intNegativePoints += intPointsUsed;
-                    }
-                }
+		        intContactPointsUsed += Math.Max(0, intHighPlaces - (_objCharacter.CHA.TotalValue*4));
 
-                // Calculate the BP used by Positive Qualities.
-                intPointsUsed = 0;
-                foreach (Quality objQuality in _objCharacter.Qualities)
-                {
-                    if (objQuality.Type == QualityType.Positive && objQuality.ContributeToBP)
-                    {
-                        intPointsUsed += objQuality.BP;
-                    }
-                }
-                //group contacts are counted as a posetive quality
-                intPointsUsed += intGroupContacts;
-                // Deduct the amount for free Qualities.
-                intPointsUsed -= _objImprovementManager.ValueOf(Improvement.ImprovementType.FreePositiveQualities);
-                int intPositivePointsUsed = intPointsUsed;
+		        //if (intContactPointsUsed > _objCharacter.ContactPoints)
+		        //    strMessage += "\n\t" + LanguageManager.Instance.GetString("Message_InvalidPointExcess").Replace("{0}", ((_objCharacter.ContactPoints - intContactPointsUsed) * -1).ToString() + " " + LanguageManager.Instance.GetString("String_Contacts"));
 
-                // Calculate the BP used for Negative Qualities.
-                intPointsUsed = 0;
-                foreach (Quality objQuality in _objCharacter.Qualities)
-                {
-                    if (objQuality.Type == QualityType.Negative && objQuality.ContributeToBP)
-                    {
-                        intPointsUsed += objQuality.BP;
-                        intNegativePoints += objQuality.BP;
-                    }
-                }
 
-                // Deduct the amount for free Qualities.
-                intPointsUsed -= _objImprovementManager.ValueOf(Improvement.ImprovementType.FreeNegativeQualities);
-                intNegativePoints -= _objImprovementManager.ValueOf(Improvement.ImprovementType.FreeNegativeQualities);
+		        // Check if the character has positive qualities outnumbering negative qualities
+		        // Calculate the BP used by Enemies. These are added to the BP since they are technically
+		        // a Negative Quality.
+		        int intPointsUsed = 0;
+		        int intNegativePoints = 0;
+		        foreach (ContactControl objContactControl in panEnemies.Controls)
+		        {
+			        if (!objContactControl.Free)
+			        {
+				        // The Enemy's BP cost = their Connection + Loyalty Rating.
+				        //intPointsUsed -= (objContactControl.ConnectionRating + objContactControl.LoyaltyRating)*
+                        //                 _objOptions.KarmaContact;
+                        intNegativePoints -= (objContactControl.ConnectionRating + objContactControl.LoyaltyRating) * _objOptions.KarmaEnemy;
+			        }
+		        }
 
-                // If the character is only allowed to gain 25 Karma from Negative Qualities but allowed to take as many as they'd like, limit their refunded points.
-                if (_objOptions.ExceedNegativeQualitiesLimit)
-                {
-                    if (intNegativePoints < (_objCharacter.MaxKarma * -1))
-                    {
-                        intNegativePoints += _objCharacter.MaxKarma;
-                    }
-                }
+		        // Calculate the BP used by Positive Qualities.
+		        intPointsUsed = 0;
+		        foreach (Quality objQuality in _objCharacter.Qualities)
+		        {
+			        if (objQuality.Type == QualityType.Positive && objQuality.ContributeToBP)
+			        {
+				        intPointsUsed += objQuality.BP;
+			        }
+		        }
+		        // Group contacts are counted as positive qualities
+		        intPointsUsed += intGroupContacts;
 
-                // if positive points > 25
-                if (intPositivePointsUsed > _objCharacter.MaxKarma)
-                {
-                    strMessage += "\n\t" + LanguageManager.Instance.GetString("Message_PositiveQualityLimit").Replace("{0}", (_objCharacter.MaxKarma).ToString());
-                    blnValid = false;
-                }
+		        // Deduct the amount for free Qualities.
+		        intPointsUsed -= _objImprovementManager.ValueOf(Improvement.ImprovementType.FreePositiveQualities);
+		        int intPositivePointsUsed = intPointsUsed;
 
-                // if negative points > 25
-                if (intNegativePoints < (_objCharacter.MaxKarma * -1))
-                {
-                    strMessage += "\n\t" + LanguageManager.Instance.GetString("Message_NegativeQualityLimit").Replace("{0}", (_objCharacter.MaxKarma).ToString());
-                    blnValid = false;
-                }
+		        // Calculate the BP used for Negative Qualities.
+		        intPointsUsed = 0;
+		        foreach (Quality objQuality in _objCharacter.Qualities)
+		        {
+			        if (objQuality.Type == QualityType.Negative && objQuality.ContributeToBP)
+			        {
+				        intPointsUsed += objQuality.BP;
+				        intNegativePoints += objQuality.BP;
+			        }
+		        }
 
-            }
+		        // Deduct the amount for free Qualities.
+		        intPointsUsed -= _objImprovementManager.ValueOf(Improvement.ImprovementType.FreeNegativeQualities);
+		        intNegativePoints -= _objImprovementManager.ValueOf(Improvement.ImprovementType.FreeNegativeQualities);
+
+		        // If the character is only allowed to gain 25 Karma from Negative Qualities but allowed to take as many as they'd like, limit their refunded points.
+		        if (_objOptions.ExceedNegativeQualitiesLimit)
+		        {
+			        if (intNegativePoints < (_objCharacter.MaxKarma*-1))
+			        {
+				        intNegativePoints = -1 * _objCharacter.MaxKarma;
+			        }
+		        }
+
+		        // if positive points > 25
+                if (intPositivePointsUsed > _objCharacter.MaxKarma && !_objOptions.ExceedPositiveQualities)
+		        {
+			        strMessage += "\n\t" +
+			                      LanguageManager.Instance.GetString("Message_PositiveQualityLimit")
+				                      .Replace("{0}", (_objCharacter.MaxKarma).ToString());
+			        blnValid = false;
+		        }
+
+		        // if negative points > 25
+                if (intNegativePoints < (_objCharacter.MaxKarma * -1) && !_objOptions.ExceedNegativeQualities)
+		        {
+			        strMessage += "\n\t" +
+			                      LanguageManager.Instance.GetString("Message_NegativeQualityLimit")
+				                      .Replace("{0}", (_objCharacter.MaxKarma).ToString());
+			        blnValid = false;
+		        }
+
+	        }
+
+	        if (_objCharacter.Contacts.Any(x => x.Connection <= 7 && (x.Connection + x.Loyalty) > 7 && !x.Free))
+	        {
+		        blnValid = false;
+		        strMessage += "\n\t" + LanguageManager.Instance.GetString("Message_HighContact");
+	        }
 
             // Check if the character has gone over the Build Point total.
             int intBuildPoints = CalculateBP();
@@ -20194,13 +20194,13 @@ namespace Chummer
             }
 
             // if character has more than permitted Metagenetic qualities
-            if (_objCharacter.metageneticLimit > 0)
+            if (_objCharacter.MetageneticLimit > 0)
             {
                 int metageneticPositiveQualities = 0;
                 int metageneticNegativeQualities = 0;
                 foreach (Quality objQuality in _objCharacter.Qualities)
                 {
-                    if (objQuality._strMetagenetic == "yes")
+                    if (objQuality._strMetagenetic == "yes" && objQuality.OriginSource.ToString() != QualitySource.Metatype.ToString())
                     {
                         if (objQuality.Type == QualityType.Positive)
                         {
@@ -20212,14 +20212,14 @@ namespace Chummer
                         }
                     }
                 }
-                if (metageneticNegativeQualities > _objCharacter.metageneticLimit)
+                if (metageneticNegativeQualities > _objCharacter.MetageneticLimit)
                 {
-                    strMessage += "\n\t" + LanguageManager.Instance.GetString("Message_OverNegativeMetagenicQualities").Replace("{0}", metageneticNegativeQualities.ToString()).Replace("{1}", _objCharacter.metageneticLimit.ToString());
+                    strMessage += "\n\t" + LanguageManager.Instance.GetString("Message_OverNegativeMetagenicQualities").Replace("{0}", metageneticNegativeQualities.ToString()).Replace("{1}", _objCharacter.MetageneticLimit.ToString());
                     blnValid = false;
                 }
-                if (metageneticPositiveQualities > _objCharacter.metageneticLimit)
+                if (metageneticPositiveQualities > _objCharacter.MetageneticLimit)
                 {
-                    strMessage += "\n\t" + LanguageManager.Instance.GetString("Message_OverPositiveMetagenicQualities").Replace("{0}", metageneticPositiveQualities.ToString()).Replace("{1}", _objCharacter.metageneticLimit.ToString());
+                    strMessage += "\n\t" + LanguageManager.Instance.GetString("Message_OverPositiveMetagenicQualities").Replace("{0}", metageneticPositiveQualities.ToString()).Replace("{1}", _objCharacter.MetageneticLimit.ToString());
                     blnValid = false;
                 }
 
@@ -22078,8 +22078,8 @@ namespace Chummer
                         objLifestyle.Area = Convert.ToInt32(objXmlLifestyle["area"].InnerText);
                         objLifestyle.AreaEntertainment = Convert.ToInt32(objXmlLifestyle["areaentertainment"].InnerText);
 
-                        foreach (XmlNode objXmlQuality in objXmlLifestyle.SelectNodes("lifestylequalities/lifestylequality"))
-                            objLifestyle.LifestyleQualities.Add(objXmlQuality.InnerText);
+                        foreach (LifestyleQuality objXmlQuality in objXmlLifestyle.SelectNodes("lifestylequalities/lifestylequality"))
+                            objLifestyle.LifestyleQualities.Add(objXmlQuality);
 
                         objNode.Text = strName;
                     }
@@ -22774,6 +22774,9 @@ namespace Chummer
                 return;
             }
 
+			//moving this belove the display select fixes #304, but prevents switch between 
+			//techno and magican, arguably a worse bug.
+			//needs a "restore state" function, but can't be arsed to implement atm
             //Revert all Special Qualities
             foreach (Quality objQuality in _objCharacter.Qualities)
             {
@@ -22820,8 +22823,8 @@ namespace Chummer
             int intLOG = _objCharacter.LOG.Value - _objCharacter.LOG.MetatypeMinimum;
             int intWIL = _objCharacter.WIL.Value - _objCharacter.WIL.MetatypeMinimum;
             int intEDG = _objCharacter.EDG.Value - _objCharacter.EDG.MetatypeMinimum;
-            int intMAG = _objCharacter.MAG.Value - _objCharacter.MAG.MetatypeMinimum;
-            int intRES = _objCharacter.RES.Value - _objCharacter.RES.MetatypeMinimum;
+	        int intMAG = Math.Max(_objCharacter.MAG.Value - _objCharacter.MAG.MetatypeMinimum, 0);
+	        int intRES = Math.Max(_objCharacter.RES.Value - _objCharacter.RES.MetatypeMinimum, 0);
 
             // Build a list of the current Metatype's Improvements to remove if the Metatype changes.
             List<Improvement> lstImprovement = new List<Improvement>();
@@ -22886,6 +22889,10 @@ namespace Chummer
                 TreeNode objNode = new TreeNode();
                 objNode.Text = objQuality.DisplayName;
                 objNode.Tag = objQuality.InternalId;
+				if (!objQuality.Implemented)
+				{
+					objNode.ForeColor = Color.Red;
+				}
                 if (objQuality.OriginSource == QualitySource.Metatype || objQuality.OriginSource == QualitySource.MetatypeRemovable)
                     objNode.ForeColor = SystemColors.GrayText;
 

@@ -1,12 +1,142 @@
+Build 176:
+Application Change:
+- Gauss Ammo is now considered ammo for heavy weapons instead of normal guns
+- Free contacts don't violate the (C+L)>7 limit when creating a character. This allows prime dataheaven membership to pass inspection...
+- Changed the default value for maritial art techniques to cost 5 instead or 4 karma, to conform with official rules. For older instalations, delete the settings file or change this in options.
+- When selecting life modules that brings an attribute above chargen limit, chummer don't crash anymore.
+- Reflex recorder now properbly affects skills linked to a physical attribute instead of the physical skill group.
+- Redliner and Cyber Singularity Seeker now grants prober bonuses
+
+
+Data Change:
+- Poor Self Control (Attention Seeking, Sadistic) now properly grant karma.
+- First-pass addition of Hard Targets content has been added. Big thanks to Reddits /u/Fweeba
+	Some provisional issues:
+	- Adept Spell does not work properly. 
+	- There are a few items that use Ratings in ways that haven't previously been required (Ie, the cloaks), so they're not as clean as I'd otherwise like. 
+- Ares Thuderstruck Gauss Rifle renamed to Ares Thunderstruck Gauss Rifle
+
+
+Build 175:
+Application Change:
+- Removed extraneous code for the Infirm quality.
+- Minor quality of life update; if you have no Settings file present when creating a new character, Chummer will prompt you to launch the Options menu. 
+- You can now press Ctrl-W to close a character file.
+- Fixed an issue with purchasing additional months of a lifestyle in career mode.
+- Fixed an issue with lifestyle qualities that had the selecttext bonus.
+- The Quality selector will show negative metagenetic qualities by default, but hide positive ones unless you're a Changeling. 
+- Support for the Trust Fund quality added. 
+- The Technomancer registered sprite limit is now based on LOG instead of CHA.
+- Fixed an issue with the cyberware selection screen not showing Essence costs.
+- Complex Forms show their translated name properly.
+- Redid how basic lifestyles work. Should make them behave better, should prevent crashes for older characters.
+- Fixed an issue that caused initiation schooling to show as a nuyen gain in the karma/nuyen log.
+- Fixed a crash caused by lifestyles with qualities.
+
+Data Change:
+- Nanohive crash issue fixed.
+- Ratings for the Expanded Volume and Amplified Immune System bioware fixed to 4. 
+- Fixed incorrect category for certain rituals.
+- Missing drugs from Chrome Flesh added. Custom drugs aren't implemented yet. As an interim, you can use Custom Item to emulate the drugs.
+- Fixed incorrect data for the Nitama Sporter.
+
+String Changes:
+- Message_CharacterOptions_OpenOptions
+- MessageTitle_CharacterOptions_OpenOptions
+
+Build 174:
+Application Change:
+- Calculation of Essence discounts is now multiplicative instead of additive. I am assured this is a good thing.
+- Fixed the default values for free karma knowledge. If you have an existing settings file, please reset to defaults by clicking Tools > Options > Karma Costs > Reset to Default.
+- Issues with Sum to Ten character generation artifically granting a MAG value higher than the metatype maximum should be fixed. I expect it'll break again in a week or so somehow, so please let me know if you experience any issues.
+- Chummer's main window now shows the current version in the title to aid troubleshooting.
+- Fixed a crash issue with Dwarves and the Resistance to Pathogens/Toxins metaquality, courtesy of Argo2445.
+- Fixed a crash caused by missing information in SURGE qualities. 
+- Fixed a crash when trying to add items that include the selecttext bonus to vehicles.
+- Public Awareness is no longer an automatically calculated value.
+- Positive Metagenetic Qualities are hidden by default UNLESS you have one of the Changeling qualities, or disable the 'hide qualities I can't take' checkbox. Not particularly happy with the implementation for this; feedback appreciated.
+
+Data Change:
+- Magical Education Life Module now has a proper karma cost; prevents crashes.
+- Myostatin Inhibitor genemod now adds 1 Strength. The karma cost needs additional code support and hasn't been implemented properly yet.
+- Fixed skill usage for cyber implant weapons.
+- Fixed missing categories for the Attention-Seeking and Sadistic variants of Poor Self Control.
+- Fixed an issue with the Net weapon that caused a crash.
+- Fixed a crash issue with the Trauma Damper, courtesy of SolitarySky.
+- Changed the Priority B Elf's Special points to 6. 
+
+Translation Changes:
+- Added French translations courtesy of sethsatan.
+
+Build 173:
+Application Change:
+- Dumpshock link changed to issue tracker.
+- A First-pass effort at adding a filter for Missions-restricted items has been added to the Options menu. Will be getting a later review to enable better filtering of the qualities, but for now it's just a global option.
+- Fixed a bug with life modules where Tír Tairngire wouldn't show demographics.
+- Chummer now handles essence holes automatically. Old items may need to be re-added.
+- College Education/School of Hard Knocks/Linguist and Jack of All Trades work properly for knowledge skills during character creation. Again. 
+- Most of the functionality for Infected has been implemented. Todo: Fix up the free attribute gain to not use qualities because it's ugly, and put in the data files content.
+- N of M contact points in priority build works again.
+- Fixed an issue where chummer failed to open when clicking on a .chum5 file.
+- Implemented functionality for the quality "Friends in High Places".
+- Save/Load methods for Advanced Lifestyles should actually work properly now, but it's still a bit fragile. Bugs are to be expected, particularly if you change your mind a lot.
+- Most issues with adepts getting levels of powers from multiple sources should be resolved. (Mentor Spirits, Foci, etc.)
+- Rounding issue for Recoil Compensation from Strength resolved.
+- Variable costs for Qualities enabled to support the Rank quality. May eventually lead into redoing the way Qualities with multiple ratings work, because High Pain Tolerance (Rating 6) offends me every time I scroll past it.
+
+Data Change:
+- Organising data file contents into regions to keep things easy to work with. 
+- Rank Quality added.
+- The Debug Lifestyle has been hidden.
+- Lifemodules no longer contains a "Magical Education (Archetype)".
+- Tír is now spelled correctly a few more places.
+- Equipment, Weapon and Ammo PACKs from run faster added.
+	There are a couple of important caveats with this:
+	First, we generally haven't bothered to input PACKs that are a single item. If someone would like to write them up then that's fine, but there's only so many hours of data entry one can do. 
+	Second, items that don't currently exist haven't been added in, like backpacks. Again, mostly a tedium thing but the PACKs code doesn't play nice with Custom Item and I don't like littering up the data files with fluff items. 
+	  Items not added include:
+	  - Backpack.
+	  - Sound-link on the earbuds.
+	  - Disposable inhaler from Cheap Soldier Pack.
+	  - Orange vest from Sportsman Pack.
+	  - Reusable Syringe from Tranq Darter Pack and Tranq Pistol Darter Pack.
+	  - Bug-out bag's dufflebag.
+	  - Mechanic Shop's duct-tape.
+	  - Surveillance pack's Periscope.
+	  - Infiltration Kit contains a Micro-Transceiver on the assumption that that's the correct item.
+	  - Medium Machine gunner pack doesn't contain ammo belts, but does come with the ammo.
+  - Ammo packs not added as stacks split among multiple types of weapons is not possible in Chummer5a.
+  - Rigger Pack gets Reaction Enhancers instead of the mythical reflex enhancers. Come on guys, it's a list of items. Seriously, if you need an editor I'm sure there's tons of people who'd be happy to sign an NDA.
+  - Big Boom Pistoleer pack has 190 rounds of heavy regular amunition, because Chummer doesn't care about your brass.
+  - Most lifestyles ignored, per the 'we can't be bothered adding single items' policy mentioned above.
+  - Gunbunny pack not added as it contains unattached accessories, which Chummer doesn't currently like handling. To be added in a future patch.
+  - Some custom packs added from reddit's shadowrun comunitieswith permission from /u/NotB0b and ShadowNET SysOp.
+  - Fixed an issue with the Extreme Cyberimplant and Junkyard Jaw from Chrome Flesh.
+  - Pulse Weave costs Rating * 3000.
+
+New strings:
+- Message_HighContact
+- Checkbox_Options_Missions
+
 Build 172:
 Application Change:
 - Due to the return of Move-By-Wire, Initiative is no longer capped to your REA+INT's augmented maximum. 
 - Fixed an issue with lifestyle quality costs that caused a crash on print.
 - The cap for Qualities is now based on your Gameplay Option. For example, a Prime Runner can spend up to 35 Karma on Positive qualities, and gain 35 from Negative qualities.
-- Compability mode added. Chummer should now **run** on .NET 4.0, but some stuff won't work, and we (the Chummer5a team) won't provide support.
+- Compability mode added. Chummer should now **run** on .NET 4.0, but some stuff might not work, and we (the Chummer5a team) won't provide support.
 - Fixed a bug where advanced (and normal?) lifestyles would crash on other languages
 - More specific spirit data is available for charsheets to use.
-- Chummer now have a crash reporter. If Chummer encounters an error it can't recover from, it will (if given permision) send a data package (hopefully) identifying the source of the crash. 
+- Chummer now has a crash reporter. If Chummer encounters an error it can't recover from, it will (if given permision) send a data package (hopefully) identifying the source of the crash. 
+- Chummer now won't pretend you have 25 BP in SumToTen/Priority build modes
+- Fixed edge case where Sum To Ten would ask for a karma amount like Karma/Life Module builds
+- Prime Data Haven now automatically creates/removes an appropriate 5C/3L contact. 
+- Cyberware can now add qualities. Not particularly happy with the implementation, but it works.
+- Cyberware can have a metatype restriction.
+- Born Rich quality works properly.
+- The Select Bioware/Cyberware form can now display a special notes text field to indicate weird workaroundy stuff that I can't be bothered fixing with code. 
+	- For example, Striking Calluses are treated as a Rating item, with the Notes field explaining why. Currently has no support for translations.
+- Essence Discount house rule enabled. Can be used to emulate the Prototype Transhuman quality for you munchkin mages that need your pain editors and whatnot until I get around to implementing it properly.
+- Fixed an issue with the incorrect cap being used for spell selection. There's still a couple of UI failures that need to be resolved, but they're a relatively low priority. 
 
 Data Change:
 - The Water Sprite quality confers +2 to Diving and Swimming, instead of prompting you to select one of them.
@@ -16,12 +146,20 @@ Data Change:
 - Added the missing qualities "Poor Self Control (Sadistic)" and "Poor Self Control (Attention-Seeking)"
 - Lifestyles.xml GUIDs populated to support the language fix.
 - Adapsin bioware properly discounts cyberware costs. 
+- Fire Modes for the Colt Inception have been fixed.
+- Metatype Reduction has been added. Due to the differing benefits, it is split up into two different items for Orks and Trolls, respectively.
+- Troll Reduction has been added.
+- Assorted bits of cosmetic bioware and bio-weapons from Chrome Flesh have been added. 
+- Life Modules have been added from all existing source books, courtesy of joha4270 and angelforest. Functionality is complete-ish, but there are some awkward modules in Further Education and such that may not quite work as expected. Feedback and suggestions for this is greatly appreciated.
+- Fixed an issue that stopped Aspected Magicians from gaining access to the Spells and Spirits tab. Replace-all is nobody's friend.
 
 String Changes:
 Altered:
 - Checkbox_Options_ExceedNegativeQualitiesLimit
 - Checkbox_Options_ExceedPositiveQualities
 - Checkbox_Options_ExceedNegativeQualities
+- Message_SpellLimit
+
 New:
 - MessageBox_NoValidContactFound
 

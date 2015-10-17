@@ -97,7 +97,35 @@ namespace Chummer
 				return;
 
 			XmlNode objXmlQuality = _objXmlDocument.SelectSingleNode("/chummer/qualities/quality[name = \"" + lstQualities.SelectedValue + "\"]");
-			int intBP = Convert.ToInt32(objXmlQuality["karma"].InnerText);
+			int intBP = 0;
+			if (objXmlQuality["karma"].InnerText.StartsWith("Variable"))
+			{
+				int intMin = 0;
+				int intMax = 0;
+				string strCost = objXmlQuality["karma"].InnerText.Replace("Variable(", string.Empty).Replace(")", string.Empty);
+				if (strCost.Contains("-"))
+				{
+					string[] strValues = strCost.Split('-');
+					intMin = Convert.ToInt32(strValues[0]);
+					intMax = Convert.ToInt32(strValues[1]);
+				}
+				else
+					intMin = Convert.ToInt32(strCost.Replace("+", string.Empty));
+
+				if (intMax == 0)
+				{
+					intMax = 1000000;
+					lblBP.Text = String.Format("{0:###,###,##0¥+}", intMin);
+				}
+				else
+					lblBP.Text = String.Format("{0:###,###,##0}", intMin) + "-" + String.Format("{0:###,###,##0¥}", intMax);
+
+				intBP = intMin;
+			}
+			else
+			{
+				intBP = Convert.ToInt32(objXmlQuality["karma"].InnerText);
+			}
             if (_objCharacter.Created && !_objCharacter.Options.DontDoubleQualities)
             {
                 intBP *= 2;
@@ -319,6 +347,14 @@ namespace Chummer
 				{
 					strXPath += " and (required/oneof[contains(., 'Changeling (Class I SURGE)')] or metagenetic = 'yes')";
 				}
+				else if (cboCategory.SelectedValue.ToString() == "Negative" || _objCharacter.MetageneticLimit > 0)
+				{
+					//Load everything, including metagenetic qualities.
+				}
+				else
+				{
+					strXPath += " and not (required/oneof[contains(., 'Changeling (Class I SURGE)')] or metagenetic = 'yes')";
+				}
 
 				foreach (XmlNode objXmlQuality in _objXmlDocument.SelectNodes("/chummer/qualities/quality[" + strXPath + "]"))
 				{
@@ -405,13 +441,13 @@ namespace Chummer
                     _objCharacter.AdeptEnabled = true;
                     break;
                 case "Changeling (Class I SURGE)":
-                    _objCharacter.metageneticLimit = 30;
+                    _objCharacter.MetageneticLimit = 30;
                     break;
                 case "Changeling (Class II SURGE)":
-                    _objCharacter.metageneticLimit = 15;
+                    _objCharacter.MetageneticLimit = 15;
                     break;
                 case "Changeling (Class III SURGE)":
-                    _objCharacter.metageneticLimit = 30;
+                    _objCharacter.MetageneticLimit = 30;
                     break;
                 default:
                     break;

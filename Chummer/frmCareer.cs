@@ -15,14 +15,10 @@ public delegate void DiceRollerOpenIntHandler(Chummer.Character objCharacter, in
 
 namespace Chummer
 {
-	public partial class frmCareer : Form
+	[System.ComponentModel.DesignerCategory("Form")]
+	public partial class frmCareer : CharacterShared
 	{
 		// Set the default culture to en-US so we work with decimals correctly.
-		private Character _objCharacter;
-		private MainController _objController;
-
-		private CharacterOptions _objOptions;
-		private CommonFunctions _objFunctions;
 		private bool _blnSkipRefresh = false;
 		private bool _blnSkipUpdate = false;
 		private bool _blnLoading = false;
@@ -62,7 +58,6 @@ namespace Chummer
 			_objCharacter.BlackMarketEnabledChanged += objCharacter_BlackMarketChanged;
 			_objCharacter.UneducatedChanged += objCharacter_UneducatedChanged;
 			_objCharacter.UncouthChanged += objCharacter_UncouthChanged;
-			_objCharacter.InfirmChanged += objCharacter_InfirmChanged;
 			GlobalOptions.Instance.MRUChanged += PopulateMRU;
 
 			LanguageManager.Instance.Load(GlobalOptions.Instance.Language, this);
@@ -112,6 +107,8 @@ namespace Chummer
 
 		private void frmCareer_Load(object sender, EventArgs e)
 		{
+			Timekeeper.Finish("load_free");
+			Timekeeper.Start("load_frm_career");
 			_blnLoading = true;
 
 			// Remove the Magician, Adept, and Technomancer tabs since they are not in use until the appropriate Quality is selected.
@@ -151,8 +148,8 @@ namespace Chummer
 					tabInitiation.Text = LanguageManager.Instance.GetString("Tab_Submersion");
                     tsMetamagicAddMetamagic.Text = LanguageManager.Instance.GetString("Button_AddEcho");
                     cmdAddMetamagic.Text = LanguageManager.Instance.GetString("Button_AddSubmersionGrade");
-                    chkInitiationGroup.Visible = false;
-                    chkInitiationOrdeal.Visible = false;
+					chkInitiationOrdeal.Text = LanguageManager.Instance.GetString("Checkbox_SubmersionTask");
+					chkInitiationGroup.Visible = false;
                     chkInitiationSchooling.Visible = false;
                     tsMetamagicAddArt.Visible = false;
                     tsMetamagicAddEnchantment.Visible = false;
@@ -186,7 +183,7 @@ namespace Chummer
 
             foreach (Skill objSkill in _objCharacter.Skills)
             {
-                if (objSkill.RatingMaximum == 6)
+                if (objSkill.RatingMaximum == 6 || objSkill.RatingMaximum == 9)
                     objSkill.RatingMaximum = 12;
                 else if (objSkill.RatingMaximum == 7)
                     objSkill.RatingMaximum = 13;
@@ -654,11 +651,6 @@ namespace Chummer
 					objGroupControl.IsEnabled = !objGroup.HasSocialSkills;
 				}
 
-				if (_objCharacter.Infirm)
-				{
-					objGroupControl.IsEnabled = !objGroup.HasPhysicalSkills;
-				}
-
 				panSkillGroups.Controls.Add(objGroupControl);
 			}
 
@@ -708,6 +700,7 @@ namespace Chummer
 					objContactControl.LoyaltyRatingChanged += objContact_LoyaltyRatingChanged;
 					objContactControl.DeleteContact += objContact_DeleteContact;
 					objContactControl.FileNameChanged += objContact_FileNameChanged;
+                    objContactControl.FreeRatingChanged += objContact_OtherCostChanged;
 					
 					objContactControl.ContactObject = objContact;
 					objContactControl.ContactName = objContact.Name;
@@ -735,6 +728,7 @@ namespace Chummer
 					objContactControl.LoyaltyRatingChanged += objEnemy_LoyaltyRatingChanged;
 					objContactControl.DeleteContact += objEnemy_DeleteContact;
 					objContactControl.FileNameChanged += objEnemy_FileNameChanged;
+                    objContactControl.FreeRatingChanged += objEnemy_FreeStatusChanged;
 
                     objContactControl.IsEnemy = true;
 					objContactControl.ContactObject = objContact;
@@ -1431,6 +1425,8 @@ namespace Chummer
 
 			// Stupid hack to get the MDI icon to show up properly.
 			this.Icon = this.Icon.Clone() as System.Drawing.Icon;
+			Timekeeper.Finish("load_frm_career");
+			Timekeeper.Finish("loading");
 		}
 
 		private void frmCareer_FormClosing(object sender, FormClosingEventArgs e)
@@ -1470,7 +1466,6 @@ namespace Chummer
 				_objCharacter.BlackMarketEnabledChanged -= objCharacter_BlackMarketChanged;
 				_objCharacter.UneducatedChanged -= objCharacter_UneducatedChanged;
 				_objCharacter.UncouthChanged -= objCharacter_UncouthChanged;
-				_objCharacter.InfirmChanged -= objCharacter_InfirmChanged;
 				GlobalOptions.Instance.MRUChanged -= PopulateMRU;
 
 				treGear.ItemDrag -= treGear_ItemDrag;
@@ -1529,6 +1524,7 @@ namespace Chummer
 					objContactControl.LoyaltyRatingChanged -= objContact_LoyaltyRatingChanged;
 					objContactControl.DeleteContact -= objContact_DeleteContact;
 					objContactControl.FileNameChanged -= objContact_FileNameChanged;
+                    objContactControl.FreeRatingChanged -= objContact_OtherCostChanged;
 				}
 
 				foreach (ContactControl objContactControl in panEnemies.Controls.OfType<ContactControl>())
@@ -1537,6 +1533,7 @@ namespace Chummer
 					objContactControl.LoyaltyRatingChanged -= objEnemy_LoyaltyRatingChanged;
 					objContactControl.DeleteContact -= objEnemy_DeleteContact;
 					objContactControl.FileNameChanged -= objEnemy_FileNameChanged;
+                    objContactControl.FreeRatingChanged += objEnemy_FreeStatusChanged;
 				}
 
 				foreach (PetControl objContactControl in panPets.Controls.OfType<PetControl>())
@@ -1991,39 +1988,6 @@ namespace Chummer
 				}
 			}
 		}
-
-		private void objCharacter_InfirmChanged(object sender)
-		{
-			if (_blnReapplyImprovements)
-				return;
-
-			// Change to the status of Infirm being enabled.
-			if (_objCharacter.Infirm)
-			{
-				// If Infirm is being added, run through all of the Physical Active Skills and disable them.
-				// Do not break SkillGroups as these will be used if this is ever removed.
-				foreach (SkillGroupControl objSkillGroupControl in panSkillGroups.Controls)
-				{
-					if (objSkillGroupControl.HasPhysicalSkills)
-					{
-						objSkillGroupControl.GroupRating = 0;
-						objSkillGroupControl.IsEnabled = false;
-					}
-				}
-			}
-			else
-			{
-				// If Infirm is being removed, run through all of the Physical Active Skills and re-enable them.
-				// If they were a part of a SkillGroup, set their Rating back.
-				foreach (SkillGroupControl objSkillGroupControl in panSkillGroups.Controls)
-				{
-					if (objSkillGroupControl.HasPhysicalSkills)
-					{
-						objSkillGroupControl.IsEnabled = true;
-					}
-				}
-			}
-		}
 		#endregion
 
 		#region Menu Events
@@ -2290,7 +2254,6 @@ namespace Chummer
 			bool blnRESEnabled = _objCharacter.RESEnabled;
 			bool blnUneducated = _objCharacter.Uneducated;
 			bool blnUncouth = _objCharacter.Uncouth;
-			bool blnInfirm = _objCharacter.Infirm;
 
 			_blnReapplyImprovements = true;
 
@@ -2744,8 +2707,6 @@ namespace Chummer
 				objCharacter_UneducatedChanged(this);
 			if (blnUncouth != _objCharacter.Uncouth)
 				objCharacter_UncouthChanged(this);
-			if (blnInfirm != _objCharacter.Infirm)
-				objCharacter_InfirmChanged(this);
 
 			_blnIsDirty = true;
 			UpdateWindowTitle();
@@ -2869,9 +2830,7 @@ namespace Chummer
 				SaveFileDialog saveFileDialog = new SaveFileDialog();
 				saveFileDialog.Filter = "Chummer5 Files (*.chum5)|*.chum5|All Files (*.*)|*.*";
 
-				string strShowFileName = "";
-				string[] strFile = _objCharacter.FileName.Split(Path.DirectorySeparatorChar);
-				strShowFileName = strFile[strFile.Length - 1];
+				string strShowFileName = Path.GetFileName(_objCharacter.FileName);
 
 				if (strShowFileName == "")
 					strShowFileName = _objCharacter.Alias;
@@ -4142,14 +4101,23 @@ namespace Chummer
 				intKarmaCost = (objSkillControl.SkillRating + 1) * _objOptions.KarmaImproveActiveSkill;
 			}
 
-			// If the character is Uneducated and the Skill is a Technical Active Skill, Uncouth and a Social Active Skill or Infirm and a Physical Active Skill, double its cost.
+			// If the character is Uneducated and the Skill is a Technical Active Skill, Uncouth and a Social Active Skill, double its cost.
 			if ((_objCharacter.Uneducated && objSkillControl.SkillCategory == "Technical Active") ||
-			    (_objCharacter.Uncouth && objSkillControl.SkillCategory == "Social Active") ||
-			    (_objCharacter.Infirm && objSkillControl.SkillCategory == "Physical Active"))
+			    (_objCharacter.Uncouth && objSkillControl.SkillCategory == "Social Active"))
             {
 				intKarmaCost *= 2;
-                }
+            }
 
+            // Jack of all trades lowers cost of skill by 1 up through rank 5, but adds 2 for ranks 6+, cant lower cost below 1
+            if (_objCharacter.JackOfAllTrades)
+            {
+                if (objSkillControl.SkillRating + 1 <= 5) {
+                    //Jack of All Trades cannot go below 1 Karma cost.
+                    if (intKarmaCost > 1) intKarmaCost -= 1;
+                } else {
+                    intKarmaCost += 2;
+                }
+            }
 
 			if (intKarmaCost > _objCharacter.Karma)
 			{
@@ -4256,6 +4224,18 @@ namespace Chummer
 			// If the character is Uneducated and the Skill is an Academic or Professional Skill, double its cost.
 			if (_objCharacter.Uneducated && (objSkillControl.SkillCategory == "Academic" || objSkillControl.SkillCategory == "Professional"))
 				intKarmaCost *= 2;
+
+            // Jack of all trades lowers cost of skill by 1 up through rank 5, but adds 2 for ranks 6+, cant lower cost below 1
+            if (_objCharacter.JackOfAllTrades)
+            {
+                if (objSkillControl.SkillRating + 1 <= 5)
+                {
+                    //Jack of All Trades cannot go below 1 Karma cost.
+                    if (intKarmaCost > 1) intKarmaCost -= 1;
+                } else {
+                    intKarmaCost += 2;
+                }
+            }
 
 			// The Karma Cost for improving a Language Knowledge Skill to Rating 1 is free for characters with the Linguistics Adept Power.
 			if (_objImprovementManager.ValueOf(Improvement.ImprovementType.AdeptLinguistics) > 0 && objSkillControl.SkillCategory == "Language" && objSkillControl.SkillRating == 0)
@@ -4517,8 +4497,8 @@ namespace Chummer
 					{
 						if (objGroupControl.GroupRating > 0)
 						{
-                            // Setting a Group's Rating above 0 should place the Skill in the Group and disable the SkillControl.
-                            if (objGroupControl.GroupRating > objSkillControl.SkillRatingMaximum)
+							// Setting a Group's Rating above 0 should place the Skill in the Group and disable the SkillControl.
+							if (objGroupControl.GroupRating > objSkillControl.SkillRating)
                             {
                                 objSkillControl.SkillRatingMaximum = objGroupControl.GroupRating;
                                 objSkillControl.SkillRating = objGroupControl.GroupRating;
@@ -4582,23 +4562,41 @@ namespace Chummer
 			UpdateWindowTitle();
 		}
 
+        private void objContact_OtherCostChanged(Object sender)
+        {
+            //Handle any other kind of change that changes contact cost
+            //mostly a free contact but a few details in run faster changes it too
+            UpdateCharacterInfo();
+
+            _blnIsDirty = true;
+            UpdateWindowTitle();
+        }
+
 		private void objContact_DeleteContact(Object sender)
 		{
-			if (!_objFunctions.ConfirmDelete(LanguageManager.Instance.GetString("Message_DeleteContact")))
+			objContact_DeleteContact(sender, false);
+		}
+
+		private void objContact_DeleteContact(Object sender, bool force)
+		{
+			if (!force && !_objFunctions.ConfirmDelete(LanguageManager.Instance.GetString("Message_DeleteContact")))
 				return;
+
 			// Handle the DeleteContact Event for the ContactControl object.
-			ContactControl objSender = (ContactControl)sender;
+			ContactControl objSender = (ContactControl) sender;
 			bool blnFound = false;
 			foreach (ContactControl objContactControl in panContacts.Controls)
 			{
 				// Set the flag to show that we have found the Contact.
 				if (objContactControl == objSender)
+				{
 					blnFound = true;
+					_objCharacter.Contacts.Remove(objContactControl.ContactObject);
+				}
 
 				// Once the Contact has been found, all of the other ContactControls on the Panel should move up 25 pixels to fill in the gap that deleting this one will cause.
 				if (blnFound)
 				{
-					_objCharacter.Contacts.Remove(objContactControl.ContactObject);
 					objContactControl.Top -= 25;
 				}
 			}
@@ -4644,6 +4642,14 @@ namespace Chummer
 			_blnIsDirty = true;
 			UpdateWindowTitle();
 		}
+
+        private void objEnemy_FreeStatusChanged(Object sender)
+        {
+            UpdateCharacterInfo();
+
+            _blnIsDirty = true;
+            UpdateWindowTitle();
+        }
 
 		private void objEnemy_DeleteContact(Object sender)
 		{
@@ -5047,6 +5053,7 @@ namespace Chummer
 			objContactControl.LoyaltyRatingChanged += objContact_LoyaltyRatingChanged;
 			objContactControl.DeleteContact += objContact_DeleteContact;
 			objContactControl.FileNameChanged += objContact_FileNameChanged;
+            objContactControl.FreeRatingChanged += objContact_OtherCostChanged;
 
 			panContacts.Controls.Add(objContactControl);
 			UpdateCharacterInfo();
@@ -5071,6 +5078,7 @@ namespace Chummer
 			objContactControl.LoyaltyRatingChanged += objEnemy_LoyaltyRatingChanged;
 			objContactControl.DeleteContact += objEnemy_DeleteContact;
 			objContactControl.FileNameChanged += objEnemy_FileNameChanged;
+            objContactControl.FreeRatingChanged += objEnemy_FreeStatusChanged;
             objContactControl.IsEnemy = true;
 
 			panEnemies.Controls.Add(objContactControl);
@@ -5454,7 +5462,12 @@ namespace Chummer
 
 						// Remove any Improvements created by the piece of Cyberware.
 						_objImprovementManager.RemoveImprovements(objCyberware.SourceType, objCyberware.InternalId);
+
+
 						_objCharacter.Cyberware.Remove(objCyberware);
+
+						//Add essence hole.
+						IncreaseEssenceHole((int)(objCyberware.CalculatedESS * 100m));
 					}
 					else
 					{
@@ -5485,6 +5498,58 @@ namespace Chummer
 			}
 
 			UpdateCharacterInfo();
+		}
+
+		private void IncreaseEssenceHole(int centiessence)
+		{
+			//id of essence hole, get by id to avoid name confusions
+			Guid essenceHoldID = Guid.Parse("b57eadaa-7c3b-4b80-8d79-cbbd922c1196");  //don't parse for every obj
+            Cyberware objHole = _objCharacter.Cyberware.Find(x => x.SourceID == essenceHoldID);
+
+			if (objHole == null)
+			{
+				XmlDocument xmlCyberware = XmlManager.Instance.Load("cyberware.xml");
+				XmlNode xmlEssHole = xmlCyberware.SelectSingleNode("//id[.='b57eadaa-7c3b-4b80-8d79-cbbd922c1196']/..");
+				objHole = new Cyberware(_objCharacter);
+				TreeNode treNode = new TreeNode();
+
+				objHole.Create(xmlEssHole, _objCharacter, GlobalOptions.CyberwareGrades.GetGrade("Standard"), Improvement.ImprovementSource.Cyberware, centiessence, treNode, new List<Weapon>(), new List<TreeNode>());
+				treCyberware.Nodes.Add(treNode);
+				_objCharacter.Cyberware.Add(objHole);
+			}
+			else  
+			{
+				objHole.Rating += centiessence;
+			}
+
+		}
+
+		private void DecreaseEssenceHole(int centiessence)
+		{
+			//id of essence hole, get by id to avoid name confusions
+			Guid essenceHoldID = Guid.Parse("b57eadaa-7c3b-4b80-8d79-cbbd922c1196");  //don't parse for every obj
+			Cyberware objHole = _objCharacter.Cyberware.Find(x => x.SourceID == essenceHoldID);
+
+			if (objHole != null)
+			{
+				if (objHole.Rating > centiessence)
+				{
+					objHole.Rating -= centiessence;
+				}
+				else
+				{
+					_objCharacter.Cyberware.Remove(objHole);
+					for (int i = treCyberware.Nodes.Count - 1; i >= 0; i--)
+					{
+						//Equals as Tag is exposed while obj, but not refequals
+						if (objHole.InternalId.Equals(treCyberware.Nodes[i].Tag))
+						{
+							treCyberware.Nodes.RemoveAt(i);
+							break;
+						}
+					}
+				}
+			}
 		}
 
 		private void cmdAddComplexForm_Click(object sender, EventArgs e)
@@ -6983,7 +7048,7 @@ namespace Chummer
                 if (chkInitiationSchooling.Checked)
                 {
                     ExpenseLogEntry objNuyenExpense = new ExpenseLogEntry();
-                    objNuyenExpense.Create(10000, LanguageManager.Instance.GetString("String_ExpenseInitiateGrade") + " " + _objCharacter.InitiateGrade.ToString() + " -> " + (_objCharacter.InitiateGrade + 1).ToString(), ExpenseType.Nuyen, DateTime.Now);
+                    objNuyenExpense.Create(-10000, LanguageManager.Instance.GetString("String_ExpenseInitiateGrade") + " " + _objCharacter.InitiateGrade.ToString() + " -> " + (_objCharacter.InitiateGrade + 1).ToString(), ExpenseType.Nuyen, DateTime.Now);
                     _objCharacter.ExpenseEntries.Add(objNuyenExpense);
                     _objCharacter.Nuyen -= 10000;
 
@@ -7031,9 +7096,11 @@ namespace Chummer
                     return;
                 }
 
-                // Make sure the character has enough Karma.
-                double dblMultiplier = 1.0;
-                dblMultiplier = Math.Round(dblMultiplier, 2);
+				// Make sure the character has enough Karma.
+				double dblMultiplier = 1.0;
+				if (chkInitiationOrdeal.Checked)
+					dblMultiplier -= 0.1;
+				dblMultiplier = Math.Round(dblMultiplier, 2);
 
                 int intKarmaExpense = Convert.ToInt32(Math.Ceiling(Convert.ToDouble((10 + ((_objCharacter.SubmersionGrade + 1) * _objOptions.KarmaInitiation)), GlobalOptions.Instance.CultureInfo) * dblMultiplier));
 
@@ -11807,6 +11874,8 @@ namespace Chummer
 						// Remove any Improvements created by the piece of Cyberware.
 						_objImprovementManager.RemoveImprovements(objCyberware.SourceType, objCyberware.InternalId);
 						_objCharacter.Cyberware.Remove(objCyberware);
+
+						IncreaseEssenceHole((int)(objCyberware.CalculatedESS * 100));
 
 						// Remove the item from the TreeView.
 						treCyberware.Nodes.Remove(treCyberware.SelectedNode);
@@ -17463,7 +17532,7 @@ namespace Chummer
 			if (objLifestyle.BaseLifestyle != "")
 			{
 				// Edit Advanced Lifestyle.
-				frmSelectLifestyle frmPickLifestyle = new frmSelectLifestyle(objNewLifestyle, _objCharacter);
+				frmSelectLifestyleAdvanced frmPickLifestyle = new frmSelectLifestyleAdvanced(objNewLifestyle, _objCharacter);
 				frmPickLifestyle.SetLifestyle(objLifestyle);
 				frmPickLifestyle.ShowDialog(this);
 
@@ -21303,7 +21372,55 @@ namespace Chummer
 
 	    public void RefreshContacts()
 	    {
-            foreach (Control contact in panContacts.Controls)
+			HashSet<Contact> existing = new HashSet<Contact>();
+			for (int i = panContacts.Controls.Count - 1; i >= 0; i--)
+			{
+				Control contact = panContacts.Controls[i];
+				ContactControl contactControl = (ContactControl)contact;
+
+				if (contactControl != null)
+				{
+					if (_objCharacter.Contacts.Contains(contactControl.ContactObject))
+					{
+						contactControl.LoyaltyRating = contactControl.LoyaltyRating; //Force refresh
+						contactControl.UpdateQuickText();
+						existing.Add(contactControl.ContactObject);
+					}
+					else
+					{
+						objContact_DeleteContact(contactControl, true);
+					}
+
+				}
+			}
+
+			//Sync panContacts to character.contacts
+			//objContactControl.ConnectionRatingChanged += objContact_ConnectionRatingChanged;
+			//objContactControl.LoyaltyRatingChanged += objContact_LoyaltyRatingChanged;
+			//objContactControl.DeleteContact += objContact_DeleteContact;
+			//objContactControl.FileNameChanged += objContact_FileNameChanged;
+
+			var newcontacts = from contact in _objCharacter.Contacts
+							  where contact.EntityType == ContactType.Contact
+							  && !existing.Contains(contact)
+							  select contact;
+
+			foreach (Contact contact in newcontacts)
+			{
+				ContactControl ctrl = new ContactControl(_objCharacter);
+				ctrl.ContactObject = contact;
+
+				ctrl.ConnectionRatingChanged += objContact_ConnectionRatingChanged;
+				ctrl.LoyaltyRatingChanged += objContact_LoyaltyRatingChanged;
+				ctrl.DeleteContact += objContact_DeleteContact;
+				ctrl.FileNameChanged += objContact_FileNameChanged;
+
+
+				ctrl.LoyaltyRating = ctrl.LoyaltyRating;
+				ctrl.ConnectionRating = ctrl.ConnectionRating;
+				panContacts.Controls.Add(ctrl);
+			}
+			foreach (Control contact in panContacts.Controls)
             {
                 // Probably won't find subclass, but don't wan't to track
                 // down bug about contacts in 4 months because i by some 
@@ -21329,8 +21446,10 @@ namespace Chummer
 				string strTip = "";
 				_blnSkipUpdate = true;
 
-                // Calculate the character's move.
-                string strMovement = "";
+				RedlinerCheck();
+
+				// Calculate the character's move.
+				string strMovement = "";
                 if (_objOptions.CyberlegMovement)
                 {
                     int intLegs = 0;
@@ -23378,9 +23497,7 @@ namespace Chummer
 			SaveFileDialog saveFileDialog = new SaveFileDialog();
 			saveFileDialog.Filter = "Chummer5 Files (*.chum5)|*.chum5|All Files (*.*)|*.*";
 
-			string strShowFileName = "";
-			string[] strFile = _objCharacter.FileName.Split(Path.DirectorySeparatorChar);
-			strShowFileName = strFile[strFile.Length - 1];
+			string strShowFileName = Path.GetFileName(_objCharacter.FileName);
 
 			if (strShowFileName == "")
 				strShowFileName = _objCharacter.Alias;
@@ -23543,6 +23660,9 @@ namespace Chummer
 			if (objCyberware.InternalId == Guid.Empty.ToString())
 				return false;
 
+			
+			
+
 			// Force the item to be Transgenic if selected.
 			if (frmPickCyberware.ForceTransgenic)
 				objCyberware.Category = "Genetech: Transgenics";
@@ -23587,6 +23707,8 @@ namespace Chummer
 					objExpense.Undo = objUndo;
 				}
 			}
+
+			DecreaseEssenceHole((int)(objCyberware.CalculatedESS * 100));
 
 			try
 			{
@@ -24307,7 +24429,7 @@ namespace Chummer
                 string strPage = objLifestyle.Page;
                 lblLifestyleSource.Text = strBook + " " + strPage;
                 tipTooltip.SetToolTip(lblLifestyleSource, _objOptions.LanguageBookLong(objLifestyle.Source) + " " + LanguageManager.Instance.GetString("String_Page") + " " + objLifestyle.Page);
-                // lblLifestyleTotalCost.Text = String.Format("= {0:###,###,##0¥}", objLifestyle.TotalCost);
+                //lblLifestyleTotalCost.Text = String.Format("= {0:###,###,##0¥}", objLifestyle.TotalCost);
 
                 // Change the Cost/Month label.
                 if (objLifestyle.StyleType == LifestyleType.Safehouse)
@@ -24328,12 +24450,12 @@ namespace Chummer
                     else
                         strBaseLifestyle = objNode["name"].InnerText;
 
-                    foreach (string strQuality in objLifestyle.LifestyleQualities)
+                    foreach (LifestyleQuality objQuality in objLifestyle.LifestyleQualities)
                     {
                         if (strQualities.Length > 0)
                             strQualities += ", ";
-                        string strQualityName = strQuality.ToString();
-                        objNode = objXmlDocument.SelectSingleNode("/chummer/qualities/quality[name = \"" + strQualityName + "\"]");
+						string strQualityName = objQuality.DisplayName;
+						objNode = objXmlDocument.SelectSingleNode("/chummer/qualities/quality[name = \"" + strQualityName + "\"]");
                         XmlNode nodCost = objNode["lifestylecost"];
                         if (nodCost != null)
                         {
@@ -24393,7 +24515,7 @@ namespace Chummer
                 }
                 else
                 {
-                    lblLifestyleComforts.Text = "";
+                    lblLifestyleComforts.Text = "Error in lifestyle;\nplease edit to fix.";
                     lblLifestyleQualities.Text = "";
                 }
 
@@ -27004,10 +27126,17 @@ namespace Chummer
 		/// </summary>
 		private void PopulateCyberware()
 		{
+			Guid sid = Guid.Parse("b57eadaa-7c3b-4b80-8d79-cbbd922c1196");
 			// Populate Cyberware.
 			foreach (Cyberware objCyberware in _objCharacter.Cyberware)
 			{
-				if (objCyberware.SourceType == Improvement.ImprovementSource.Cyberware)
+				if (objCyberware.SourceID == sid)
+				{
+					TreeNode nHole = new TreeNode(objCyberware.DisplayName);
+					nHole.Tag = objCyberware.InternalId;
+					treCyberware.Nodes.Add(nHole);
+				}
+				else if (objCyberware.SourceType == Improvement.ImprovementSource.Cyberware)
 				{
 					_objFunctions.BuildCyberwareTree(objCyberware, treCyberware.Nodes[0], cmsCyberware, cmsCyberwareGear);
 				}
