@@ -15,9 +15,7 @@ namespace Chummer
 	{
 		public static void BuildFromException(object sender, UnhandledExceptionEventArgs e)
 		{
-			if (Debugger.IsAttached) return;
-
-			if (
+			if (true ||
 				MessageBox.Show("Chummer5a crashed.\nDo you want to send a crash report to the developer?", "Crash!",
 					MessageBoxButtons.YesNo) == DialogResult.Yes)
 			{
@@ -54,7 +52,7 @@ namespace Chummer
 					report.AddData("default.xml", ex.ToString());
 				}
 
-
+				report.Dump(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "crashdump"));
 				report.Send();
 				MessageBox.Show("Crash report sent.\nPlease refer to the crash id " + report.Id);
 			}
@@ -159,6 +157,27 @@ namespace Chummer
 		{
 			values.Add(new KeyValuePair<string, Stream>(title, contents));
 			return this;
+		}
+
+		public void Dump(string path)
+		{
+			
+
+			try
+			{
+				Directory.CreateDirectory(path);
+				foreach (KeyValuePair<string, Stream> pair in values)
+				{
+					var filestream = File.Create(Path.Combine(path, pair.Key));
+					pair.Value.CopyTo(filestream);
+					filestream.Close();
+				}
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.ToString(), "Something went totally wrong", MessageBoxButtons.OK);
+			}
+
 		}
 
 		public bool Send()

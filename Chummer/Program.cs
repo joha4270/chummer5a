@@ -26,7 +26,9 @@ namespace Chummer
 
 			//crash handler that will offer to send a mail
 			AppDomain.CurrentDomain.UnhandledException += CrashReport.BuildFromException;
-			
+
+	        throw new Exception();
+
 			//Needs to be called before Log is setup, as it moves where log might be.
 	        FixCwd();
 
